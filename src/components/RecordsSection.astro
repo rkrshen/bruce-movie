@@ -1,6 +1,7 @@
 ---
 import { PROJECT_RECORDS } from '../data/content';
 import { getTranslations, type Locale } from '../i18n';
+import Icons from './Icons.astro';
 
 interface Props {
   locale: Locale;
@@ -8,57 +9,223 @@ interface Props {
 
 const { locale } = Astro.props;
 const t = getTranslations(locale);
+
+const yearGroups = PROJECT_RECORDS.filter((g) => /^\d{4}$/.test(g.id));
+const mvGroup = PROJECT_RECORDS.find((g) => g.id === 'mv');
+const commercialGroup = PROJECT_RECORDS.find((g) => g.id === 'commercial');
+
+const totalYearCredits = yearGroups.reduce((sum, g) => sum + g.items[locale].length, 0);
 ---
 
-<section class="section section-records" aria-label={t.records.kicker}>
+<section class="section section-records" id="records" aria-label={t.records.kicker}>
   <div class="container">
-    <div class="record-browser" data-tabs-root>
-      <div
-        class="record-tab-nav"
-        role="tablist"
-        aria-label={t.records.tabAriaLabel}
-      >
-        {
-          PROJECT_RECORDS.map((group, index) => {
-            const selected = index === 0;
-            return (
+    <div class="records-shell" data-tabs-root data-animated-tabs data-reveal>
+      <div class="records-head">
+        <div class="records-head__intro">
+          <p class="records-kicker">{t.records.kicker}</p>
+          <p class="records-range" aria-hidden="true">{t.records.timelineRange}</p>
+        </div>
+
+        <div class="records-mode-tabs" role="tablist" aria-label={t.records.tabAriaLabel}>
+          <span class="records-tab-indicator" data-tab-indicator aria-hidden="true"></span>
+          <button
+            type="button"
+            role="tab"
+            class="records-mode-btn"
+            id="record-tab-timeline"
+            aria-selected="true"
+            aria-controls="record-panel-timeline"
+            tabindex="0"
+          >
+            <span>{t.records.timelineTab}</span>
+            <span class="records-mode-count">{totalYearCredits}</span>
+          </button>
+
+          {
+            mvGroup && (
               <button
                 type="button"
                 role="tab"
-                class="record-tab-button"
-                id={`record-tab-${group.id}`}
-                aria-selected={selected ? 'true' : 'false'}
-                aria-controls={`record-panel-${group.id}`}
-                tabindex={selected ? 0 : -1}
+                class="records-mode-btn"
+                id="record-tab-mv"
+                aria-selected="false"
+                aria-controls="record-panel-mv"
+                tabindex="-1"
               >
-                {group.label[locale]}
+                <span>{mvGroup.label[locale]}</span>
+                <span class="records-mode-count">{mvGroup.items[locale].length}</span>
               </button>
-            );
-          })
-        }
+            )
+          }
+
+          {
+            commercialGroup && (
+              <button
+                type="button"
+                role="tab"
+                class="records-mode-btn"
+                id="record-tab-commercial"
+                aria-selected="false"
+                aria-controls="record-panel-commercial"
+                tabindex="-1"
+              >
+                <span>{commercialGroup.label[locale]}</span>
+                <span class="records-mode-count">{commercialGroup.items[locale].length}</span>
+              </button>
+            )
+          }
+        </div>
       </div>
 
-      {
-        PROJECT_RECORDS.map((group, index) => (
+      <!-- Chronological Timeline Panel -->
+      <div
+        class="records-panel"
+        role="tabpanel"
+        id="record-panel-timeline"
+        aria-labelledby="record-tab-timeline"
+        data-timeline-root
+      >
+        <div class="timeline-controls">
           <div
-            class="record-panel"
-            role="tabpanel"
-            id={`record-panel-${group.id}`}
-            aria-labelledby={`record-tab-${group.id}`}
-            hidden={index !== 0}
+            class="timeline-scrubber"
+            role="navigation"
+            aria-label={t.records.yearJumpLabel}
+            tabindex="0"
           >
-            <div class="record-panel-header">
-              <p class="record-panel-kicker">{t.records.kicker}</p>
-              <h3 class="record-panel-title">{group.heading[locale]}</h3>
-              <p class="record-panel-meta">{t.records.count(group.items.length)}</p>
+            {
+              yearGroups.map((group, index) => (
+                <button
+                  type="button"
+                  class:list={['timeline-year-chip', index === 0 && 'is-active']}
+                  data-timeline-jump={group.id}
+                >
+                  {group.id}
+                </button>
+              ))
+            }
+          </div>
+
+          <button
+            type="button"
+            class="timeline-expand-btn"
+            data-timeline-toggle-all
+            data-label-expand={t.records.expandAll}
+            data-label-collapse={t.records.collapseYears}
+            aria-expanded="false"
+          >
+            <span>{t.records.expandAll}</span>
+            <Icons name="chevron-down" size={16} />
+          </button>
+        </div>
+
+        <div class="timeline-stage">
+          <div class="timeline-spine" aria-hidden="true">
+            <div class="timeline-spine__glow"></div>
+          </div>
+
+          <ol class="timeline-list">
+            {
+              yearGroups.map((group, index) => {
+                const items = group.items[locale];
+                return (
+                  <li
+                    class="timeline-node"
+                    id={`timeline-year-${group.id}`}
+                    data-timeline-year={group.id}
+                  >
+                    <details class="timeline-card" open={index < 3} data-timeline-details>
+                      <summary
+                        class="timeline-card__summary"
+                        aria-label={t.records.toggleYearDetails(group.heading[locale])}
+                      >
+                        <span class="timeline-card__dot" aria-hidden="true"></span>
+                        <div class="timeline-card__title-group">
+                          <h3 class="timeline-card__year">{group.heading[locale]}</h3>
+                          <span class="timeline-card__count">{t.records.count(items.length)}</span>
+                        </div>
+                        <span class="timeline-card__preview" aria-hidden="true">
+                          {items[0]}
+                        </span>
+                        <span class="timeline-card__chevron" aria-hidden="true">
+                          <Icons name="chevron-down" size={18} />
+                        </span>
+                      </summary>
+
+                      <div class="timeline-card__body">
+                        <ul class="record-list" role="list">
+                          {items.map((item) => (
+                            <li class="record-list-item" data-spotlight>
+                              <span class="record-list-item__dot" aria-hidden="true"></span>
+                              <span class="record-list-item__text">{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </details>
+                  </li>
+                );
+              })
+            }
+          </ol>
+        </div>
+      </div>
+
+      <!-- MV Panel -->
+      {
+        mvGroup && (
+          <div
+            class="records-panel records-panel--collection"
+            role="tabpanel"
+            id="record-panel-mv"
+            aria-labelledby="record-tab-mv"
+            hidden
+          >
+            <div class="collection-header">
+              <h3 class="collection-header__title">{mvGroup.heading[locale]}</h3>
+              <p class="collection-header__meta">{t.records.count(mvGroup.items[locale].length)}</p>
             </div>
-            <ul class="record-list" role="list">
-              {group.items.map((item) => (
-                <li class="record-list-item">{item}</li>
+            <ul class="record-list record-list--numbered" role="list">
+              {mvGroup.items[locale].map((item, idx) => (
+                <li class="record-list-item" data-spotlight>
+                  <span class="record-list-item__num" aria-hidden="true">
+                    {String(idx + 1).padStart(2, '0')}
+                  </span>
+                  <span class="record-list-item__text">{item}</span>
+                </li>
               ))}
             </ul>
           </div>
-        ))
+        )
+      }
+
+      <!-- Commercials Panel -->
+      {
+        commercialGroup && (
+          <div
+            class="records-panel records-panel--collection"
+            role="tabpanel"
+            id="record-panel-commercial"
+            aria-labelledby="record-tab-commercial"
+            hidden
+          >
+            <div class="collection-header">
+              <h3 class="collection-header__title">{commercialGroup.heading[locale]}</h3>
+              <p class="collection-header__meta">
+                {t.records.count(commercialGroup.items[locale].length)}
+              </p>
+            </div>
+            <ul class="record-list record-list--numbered" role="list">
+              {commercialGroup.items[locale].map((item, idx) => (
+                <li class="record-list-item" data-spotlight>
+                  <span class="record-list-item__num" aria-hidden="true">
+                    {String(idx + 1).padStart(2, '0')}
+                  </span>
+                  <span class="record-list-item__text">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
       }
     </div>
   </div>

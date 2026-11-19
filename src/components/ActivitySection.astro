@@ -1,7 +1,8 @@
 ---
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import { ACTIVITY_MEDIA, type ActivityKey } from '../data/content';
 import { getTranslations, type Locale } from '../i18n';
+import Icons from './Icons.astro';
 
 interface Props {
   locale: Locale;
@@ -10,44 +11,131 @@ interface Props {
 const { locale } = Astro.props;
 const t = getTranslations(locale);
 const activityOrder: ActivityKey[] = ['stage', 'tccf', 'masterclass', 'campus'];
+
+const activities = await Promise.all(
+  activityOrder.map(async (key) => {
+    const card = t.activity.cards[key];
+    const images = ACTIVITY_MEDIA[key];
+    const lightboxUrls = await Promise.all(
+      images.map(async (img) => {
+        const optimized = await getImage({
+          src: img,
+          width: Math.min(img.width, 1440),
+          format: 'webp',
+          quality: 86,
+        });
+        return optimized.src;
+      }),
+    );
+
+    return {
+      key,
+      card,
+      images,
+      lightboxUrls,
+    };
+  }),
+);
 ---
 
-<section class="section text-center" id="activity" aria-labelledby="activity-heading">
+<section class="section section-activity" id="activity" tabindex="-1" aria-labelledby="activity-heading">
   <div class="container">
-    <h2 class="title" id="activity-heading">{t.activity.title}</h2>
+    <header class="section-header" data-reveal>
+      <p class="section-eyebrow" aria-hidden="true">
+        <span class="section-eyebrow__num">03</span>
+        <span class="section-eyebrow__line"></span>
+        <span>{t.header.activity}</span>
+      </p>
+      <h2 class="section-title" id="activity-heading">{t.activity.title}</h2>
+    </header>
 
     <div class="activity-grid">
       {
-        activityOrder.map((key) => {
-          const card = t.activity.cards[key];
-          const images = ACTIVITY_MEDIA[key];
+        activities.map(({ key, card, images, lightboxUrls }) => (
+          <article class="activity-card" data-reveal data-spotlight data-card-gallery={key}>
+            <div class="activity-gallery">
+              <div
+                class="activity-gallery__track"
+                data-gallery-track
+                tabindex="0"
+                role="region"
+                aria-label={card.title}
+              >
+                {images.map((img, idx) => {
+                  const alt = card.alts[idx] ?? card.title;
+                  return (
+                    <div class="activity-gallery__slide" data-gallery-slide={String(idx)}>
+                      <button
+                        type="button"
+                        class="activity-gallery__trigger"
+                        data-lightbox-trigger
+                        data-lightbox-group={`activity-${key}`}
+                        data-lightbox-index={String(idx)}
+                        data-lightbox-src={lightboxUrls[idx]}
+                        data-lightbox-alt={alt}
+                        data-lightbox-caption={`${card.title} — ${alt}`}
+                        aria-label={`${t.lightbox.openPhoto}：${alt}`}
+                      >
+                        <Image
+                          src={img}
+                          alt={alt}
+                          widths={[480, 760]}
+                          sizes="(min-width: 992px) 46vw, 94vw"
+                          format="webp"
+                          quality={82}
+                          loading="lazy"
+                          decoding="async"
+                          class="activity-gallery__img"
+                        />
+                        <span class="activity-gallery__expand" aria-hidden="true">
+                          <Icons name="expand" size={15} />
+                        </span>
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
 
-          return (
-            <article class="activity-card">
-              <div class="activity-card__images">
-                {images.map((img, idx) => (
-                  <Image
-                    src={img}
-                    alt={card.alts[idx] ?? card.title}
-                    widths={[480, 760]}
-                    sizes="(min-width: 576px) 48vw, 100vw"
-                    format="webp"
-                    quality={80}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                ))}
-              </div>
-              <div class="activity-card__body">
-                <h3 class="activity-card__title">{card.title}</h3>
-                {card.lines.map((line) => (
-                  <p class="activity-card__text">{line}</p>
-                ))}
-                {card.note && <p class="activity-card__text activity-note">{card.note}</p>}
-              </div>
-            </article>
-          );
-        })
+              {images.length > 1 && (
+                <div class="activity-gallery__bar">
+                  <div class="activity-gallery__thumbs" role="group" aria-label={card.title}>
+                    {images.map((img, idx) => (
+                      <button
+                        type="button"
+                        class="activity-gallery__thumb"
+                        data-gallery-dot={String(idx)}
+                        aria-label={`${card.title} (${idx + 1} / ${images.length})`}
+                        aria-current={idx === 0 ? 'true' : undefined}
+                      >
+                        <Image
+                          src={img}
+                          alt=""
+                          width={120}
+                          height={80}
+                          format="webp"
+                          quality={70}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  <span class="activity-gallery__counter" data-gallery-counter aria-hidden="true">
+                    1 / {images.length}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div class="activity-card__body">
+              <h3 class="activity-card__title">{card.title}</h3>
+              {card.lines.map((line) => (
+                <p class="activity-card__text">{line}</p>
+              ))}
+              {card.note && <p class="activity-card__text activity-note">{card.note}</p>}
+            </div>
+          </article>
+        ))
       }
     </div>
   </div>

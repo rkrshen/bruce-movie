@@ -1,0 +1,58 @@
+---
+import { getTranslations, type Locale } from '../i18n';
+import Icons from './Icons.astro';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+---
+
+<dialog
+  class="lightbox-dialog"
+  id="media-lightbox"
+  aria-label={t.lightbox.label}
+  closedby="any"
+>
+  <div class="lightbox__surface">
+    <div class="lightbox__topbar">
+      <p class="lightbox__counter" data-lightbox-counter></p>
+      <button
+        type="button"
+        class="lightbox__close"
+        data-lightbox-close
+        aria-label={t.lightbox.close}
+        autofocus
+      >
+        <Icons name="close" size={22} />
+      </button>
+    </div>
+
+    <div class="lightbox__stage">
+      <button
+        type="button"
+        class="lightbox__nav lightbox__nav--prev"
+        data-lightbox-prev
+        aria-label={t.lightbox.prev}
+      >
+        <Icons name="chevron-left" size={22} />
+      </button>
+
+      <figure class="lightbox__figure">
+        <img class="lightbox__img" data-lightbox-img alt="" />
+        <figcaption class="lightbox__caption" data-lightbox-caption></figcaption>
+      </figure>
+
+      <button
+        type="button"
+        class="lightbox__nav lightbox__nav--next"
+        data-lightbox-next
+        aria-label={t.lightbox.next}
+      >
+        <Icons name="chevron-right" size={22} />
+      </button>
+    </div>
+  </div>
+</dialog>

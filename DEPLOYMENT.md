@@ -29,21 +29,25 @@
 
 ---
 
-## 步驟三：設定 Cloudflare Turnstile 與聯絡表單機密金鑰
+## 步驟三：聯絡表單寄信設定（Web3Forms 預設直連 / 選配 Resend + Turnstile 後端）
 
-> ⚠️ **安全提醒**：舊版正式站曾將 Web3Forms Access Key 直接暴露在前端 JavaScript 中，建議前往 [Web3Forms Dashboard](https://app.web3forms.com/) **重新產生一組新的 Access Key**（或至少開啟 Domain Whitelist 限制僅允許 `brucemovie.com`）。
+> ℹ️ **重要技術說明（已實測驗證）**：Web3Forms 免費方案會阻擋所有伺服器端（含 Cloudflare Workers / Pages Functions）發出的 `POST` 請求並回傳 `HTTP 403`；其 `access_key` 本身即為官方設計的前端公開表單識別碼（搭配 Honeypot 與瀏覽器直連寄信）。
+>
+> - **預設模式（開箱即用、免額外設定）**：聯絡表單已預設透過瀏覽器直連 `https://api.web3forms.com/submit` 寄信至 `brucemovie@gmail.com`（於本機預覽、GitHub Pages 與 Cloudflare Pages 皆可正常寄出）。若需更換 Web3Forms 金鑰，只要在環境變數設定 `PUBLIC_WEB3FORMS_ACCESS_KEY` 或更新 [`src/data/site.ts`](./src/data/site.ts) 即可。
+> - **進階後端模式（選配：Cloudflare Pages Function + Resend + Turnstile）**：若希望完全改由伺服器端寄信並啟用 Cloudflare Turnstile，請完成以下設定：
 
-1. 在 Cloudflare Dashboard 進入 **Turnstile → Add widget**：
-   - **Domain**：新增 `brucemovie.com`（可選加上您的 `*.pages.dev` 測試網址）
-   - **Widget Mode**：`Managed`
-   - 取得 **Site Key** 與 **Secret Key**。
-2. 回到 **Cloudflare Pages 專案 → Settings → Variables and Secrets**，設定以下環境變數（設定後需重新觸發一次部署使前端讀到 `PUBLIC_TURNSTILE_SITE_KEY`）：
+1. 在 [Resend](https://resend.com/) 驗證 `brucemovie.com` 網域並取得 API Key（免費方案每月 3,000 封）。
+2. 在 Cloudflare Dashboard 進入 **Turnstile → Add widget**（`Domain`: `brucemovie.com`，`Widget Mode`: `Managed`），取得 **Site Key** 與 **Secret Key**。
+3. 回到 **Cloudflare Pages 專案 → Settings → Variables and Secrets**，設定以下變數並重新部署：
 
 | 變數名稱 | 類型 | 說明 |
 | :--- | :--- | :--- |
+| `PUBLIC_CONTACT_ENDPOINT` | Plaintext（公開） | 設為 `/api/contact` 以切換至伺服器端寄信模式 |
 | `PUBLIC_TURNSTILE_SITE_KEY` | Plaintext（公開） | Turnstile Site Key（前端顯示驗證元件用） |
 | `TURNSTILE_SECRET_KEY` | **Secret（加密）** | Turnstile Secret Key（`functions/api/contact.ts` 後端驗證用） |
-| `WEB3FORMS_ACCESS_KEY` | **Secret（加密）** | Web3Forms Access Key（僅存於後端，不再外洩至瀏覽器） |
+| `RESEND_API_KEY` | **Secret（加密）** | Resend API Key（僅存於伺服器端，不外洩至瀏覽器） |
+| `CONTACT_FROM_EMAIL` | Plaintext（公開） | 寄件人（如 `Bruce Movie <noreply@brucemovie.com>`） |
+| `CONTACT_TO_EMAIL` | Plaintext（公開） | 收件人（預設 `brucemovie@gmail.com`） |
 
 ---
 

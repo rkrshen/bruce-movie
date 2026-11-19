@@ -7,9 +7,9 @@
 ## 技術架構與安全特性
 
 - **框架與建置**：Astro（靜態輸出 `dist/`）、TypeScript Strict Mode、`@astrojs/sitemap`、`sharp` 響應式 WebP 圖片最佳化（自動剝除 EXIF/GPS）。
-- **零前端框架執行期負擔**：全站產出約 `6 KB` JS（gzip `2.2 KB`）與 `17 KB` CSS（gzip `4.3 KB`），無外部 Font Awesome / Google Fonts 阻塞與供應鏈風險。
-- **HTTP 安全標頭**：透過 [`public/_headers`](./public/_headers) 設定 HSTS、嚴格 CSP（`script-src` 無 `unsafe-inline`）、`X-Frame-Options: DENY`、`X-Content-Type-Options: nosniff`、`Referrer-Policy`、`Permissions-Policy` 與 `/_astro/*` 不可變長期快取。
-- **表單後端防護**：[`functions/api/contact.ts`](./functions/api/contact.ts) 透過 Cloudflare Pages Function 執行來源網域檢查、欄位長度與格式驗證、Honeypot 誘捕、**Cloudflare Turnstile 後端驗證**，並將 `WEB3FORMS_ACCESS_KEY` 保留於伺服器端機密變數不外洩至瀏覽器。
+- **現代化電影質感介面與原生效能**：採用 2027 電影深色視覺系統、原生 CSS Scroll-Driven Animations、Cross-Document View Transitions、原生 `<dialog>` 行動版側抽屜與燈箱檢視器、互動式年度作品時間軸（2015–2024），全站零外部 Font Awesome / Google Fonts 阻塞。
+- **HTTP 安全標頭**：透過 [`public/_headers`](./public/_headers) 設定 HSTS、嚴格 CSP（`script-src` 無 `unsafe-inline`、`connect-src` 嚴格白名單）、`X-Frame-Options: DENY`、`X-Content-Type-Options: nosniff`、`Referrer-Policy`、`Permissions-Policy` 與 `/_astro/*` 不可變長期快取。
+- **可靠聯絡表單寄信**：預設透過瀏覽器直連 Web3Forms API（搭配 Honeypot 誘捕與完整表單驗證，於 GitHub Pages、Cloudflare Pages 與本機皆可正常寄信），另保留 [`functions/api/contact.ts`](./functions/api/contact.ts) 供未來選配 **Cloudflare Turnstile + Resend API** 伺服器端寄信。
 - **雙語靜態預渲染**：建置期輸出 `/index.html`（`zh-TW`）、`/en.html`（`/en`，HTTP 200）、`/404.html` 與完整 Open Graph / Twitter Card / `hreflang` / JSON-LD。
 
 ## 本機開發與驗證

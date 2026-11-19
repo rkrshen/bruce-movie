@@ -15,39 +15,51 @@ const ytThumbnail = `https://i.ytimg.com/vi/${SITE.youtubeReportId}/hqdefault.jp
 const ytEmbedUrl = `https://www.youtube-nocookie.com/embed/${SITE.youtubeReportId}?autoplay=1&rel=0`;
 ---
 
-<section class="section text-center" id="report" aria-labelledby="report-heading">
+<section class="section section-report" id="report" tabindex="-1" aria-labelledby="report-heading">
   <div class="container">
-    <h2 class="title" id="report-heading">{t.report.title}</h2>
+    <header class="section-header" data-reveal>
+      <p class="section-eyebrow" aria-hidden="true">
+        <span class="section-eyebrow__num">02</span>
+        <span class="section-eyebrow__line"></span>
+        <span>{t.header.report}</span>
+      </p>
+      <h2 class="section-title" id="report-heading">{t.report.title}</h2>
+    </header>
 
-    <div class="report-wrap">
-      <div
-        class="video-stage"
-        data-youtube-facade
-        data-embed-url={ytEmbedUrl}
-        data-iframe-title={t.report.youtubeTitle}
-      >
-        <button
-          type="button"
-          class="lazy-video-card__preview"
-          aria-label={t.report.youtubePlayLabel}
+    <div class="report-grid">
+      <article class="reel-card" data-reveal data-spotlight>
+        <div
+          class="video-stage"
+          data-youtube-facade
+          data-embed-url={ytEmbedUrl}
+          data-iframe-title={t.report.youtubeTitle}
         >
-          <img
-            src={ytThumbnail}
-            alt={t.report.youtubeTitle}
-            width="480"
-            height="360"
-            loading="lazy"
-            decoding="async"
-            class="lazy-video-card__poster"
-          />
-          <span class="lazy-video-card__overlay" aria-hidden="true">
-            <span class="lazy-video-card__play">
-              <Icons name="play" size={14} />
-              <span>{t.effect.playButton}</span>
+          <button
+            type="button"
+            class="lazy-video-card__preview"
+            aria-label={t.report.youtubePlayLabel}
+          >
+            <img
+              src={ytThumbnail}
+              alt={t.report.youtubeTitle}
+              width="480"
+              height="360"
+              loading="lazy"
+              decoding="async"
+              class="lazy-video-card__poster"
+            />
+            <span class="lazy-video-card__overlay" aria-hidden="true">
+              <span class="video-play-orb">
+                <Icons name="play" size={20} />
+              </span>
+              <span class="lazy-video-card__play">{t.effect.playButton}</span>
             </span>
-          </span>
-        </button>
-      </div>
+          </button>
+        </div>
+        <div class="reel-card__meta">
+          <h3 class="reel-card__title">{t.report.youtubeTitle}</h3>
+        </div>
+      </article>
 
       <LazyVideoCard
         title={t.report.simulationTitle}
@@ -56,7 +68,6 @@ const ytEmbedUrl = `https://www.youtube-nocookie.com/embed/${SITE.youtubeReportI
         playLabel={t.effect.playButton}
         playAriaLabel={`${t.effect.playAriaPrefix}${t.report.simulationTitle}`}
         unsupportedText={t.effect.videoUnsupported}
-        centered
       />
     </div>
   </div>

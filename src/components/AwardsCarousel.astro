@@ -1,5 +1,5 @@
 ---
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import { AWARD_SLIDES } from '../data/content';
 import { getTranslations, type Locale } from '../i18n';
 import Icons from './Icons.astro';
@@ -11,72 +11,57 @@ interface Props {
 const { locale } = Astro.props;
 const t = getTranslations(locale);
 const total = AWARD_SLIDES.length;
+
+const slides = await Promise.all(
+  AWARD_SLIDES.map(async (slide, idx) => {
+    const isLandscape = slide.image.width > slide.image.height;
+    const optimized = await getImage({
+      src: slide.image,
+      width: Math.min(slide.image.width, 1280),
+      format: 'webp',
+      quality: 86,
+    });
+    return {
+      ...slide,
+      idx,
+      isLandscape,
+      lightboxSrc: optimized.src,
+    };
+  }),
+);
 ---
 
-<section class="section text-center" id="work" aria-labelledby="work-heading">
+<section class="section section-work" id="work" tabindex="-1" aria-labelledby="work-heading">
   <div class="container">
-    <h2 class="title" id="work-heading">{t.work.title}</h2>
+    <header class="section-header" data-reveal>
+      <p class="section-eyebrow" aria-hidden="true">
+        <span class="section-eyebrow__num">05</span>
+        <span class="section-eyebrow__line"></span>
+        <span>{t.header.work}</span>
+      </p>
+      <h2 class="section-title" id="work-heading">{t.work.title}</h2>
+    </header>
 
     <div
-      class="work-carousel"
+      class="awards-carousel"
       role="region"
       aria-roledescription="carousel"
       aria-label={t.work.carouselAriaLabel}
       data-carousel
+      data-reveal
     >
-      <div class="work-carousel__stage" data-carousel-stage>
+      <div class="awards-carousel__controls">
         <button
           type="button"
-          class="work-carousel__arrow work-carousel__arrow--prev"
+          class="awards-carousel__arrow awards-carousel__arrow--prev"
           data-carousel-prev
           aria-label={t.work.prevSlide}
         >
           <Icons name="chevron-left" size={20} />
         </button>
-
-        {
-          AWARD_SLIDES.map((slide, idx) => {
-            const stateClass =
-              idx === 0
-                ? 'is-active'
-                : idx === 1
-                  ? 'is-next'
-                  : idx === total - 1
-                    ? 'is-prev'
-                    : '';
-            return (
-              <figure
-                class:list={['work-carousel__slide', stateClass]}
-                role="group"
-                aria-roledescription="slide"
-                aria-label={t.work.slideOf(idx + 1, total)}
-                data-slide-index={String(idx)}
-                data-slide-label={t.work.slideOf(idx + 1, total)}
-              >
-                <div class="work-carousel__mask" aria-hidden="true" />
-                <Image
-                  src={slide.image}
-                  alt={slide.alt[locale]}
-                  widths={[480, 760, 1080]}
-                  sizes="(min-width: 768px) 420px, 92vw"
-                  format="webp"
-                  quality={82}
-                  loading="lazy"
-                  decoding="async"
-                  fetchpriority={idx === 0 ? undefined : 'low'}
-                  class="work-carousel__img"
-                />
-                <figcaption class="work-carousel__caption">
-                  {slide.caption[locale]}
-                </figcaption>
-              </figure>
-            );
-          })
-        }
-
         <button
           type="button"
-          class="work-carousel__arrow work-carousel__arrow--next"
+          class="awards-carousel__arrow awards-carousel__arrow--next"
           data-carousel-next
           aria-label={t.work.nextSlide}
         >
@@ -84,21 +69,87 @@ const total = AWARD_SLIDES.length;
         </button>
       </div>
 
-      <p class="visually-hidden" role="status" aria-live="polite" data-carousel-status></p>
-
-      <nav class="work-carousel__markers" aria-label={t.work.markersAriaLabel}>
+      <div
+        class="awards-carousel__track"
+        data-carousel-track
+        tabindex="0"
+        role="group"
+        aria-label={t.work.slidesAriaLabel}
+      >
         {
-          AWARD_SLIDES.map((_, idx) => (
-            <button
-              type="button"
-              class="work-carousel__marker"
-              data-carousel-marker={String(idx)}
-              aria-label={t.work.goToSlide(idx + 1)}
-              aria-current={idx === 0 ? 'true' : undefined}
-            />
+          slides.map((slide) => (
+            <figure
+              class:list={[
+                'awards-slide',
+                slide.idx === 0 && 'is-current',
+                slide.isLandscape && 'awards-slide--landscape',
+              ]}
+              role="group"
+              aria-roledescription="slide"
+              aria-label={t.work.slideOf(slide.idx + 1, total)}
+              data-slide-index={String(slide.idx)}
+              data-slide-label={t.work.slideOf(slide.idx + 1, total)}
+            >
+              <button
+                type="button"
+                class="awards-slide__media"
+                data-lightbox-trigger
+                data-lightbox-group="awards"
+                data-lightbox-index={String(slide.idx)}
+                data-lightbox-src={slide.lightboxSrc}
+                data-lightbox-alt={slide.alt[locale]}
+                data-lightbox-caption={slide.caption[locale]}
+                aria-label={`${t.lightbox.openPhoto}：${slide.caption[locale]}`}
+              >
+                <Image
+                  src={slide.image}
+                  alt={slide.alt[locale]}
+                  widths={[480, 760, 1080]}
+                  sizes="(min-width: 992px) 620px, 88vw"
+                  format="webp"
+                  quality={84}
+                  loading="lazy"
+                  decoding="async"
+                  fetchpriority={slide.idx === 0 ? undefined : 'low'}
+                  class="awards-slide__img"
+                />
+                <span class="awards-slide__expand" aria-hidden="true">
+                  <Icons name="expand" size={16} />
+                </span>
+              </button>
+
+              <figcaption class="awards-slide__caption">
+                <span class="awards-slide__badge" aria-hidden="true">
+                  <Icons name="award" size={15} />
+                  <span>{String(slide.idx + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}</span>
+                </span>
+                <p class="awards-slide__text">{slide.caption[locale]}</p>
+              </figcaption>
+            </figure>
           ))
         }
-      </nav>
+      </div>
+
+      <p class="visually-hidden" role="status" aria-live="polite" data-carousel-status></p>
+
+      <div class="awards-carousel__footer">
+        <nav class="awards-carousel__markers" aria-label={t.work.markersAriaLabel}>
+          {
+            slides.map((slide) => (
+              <button
+                type="button"
+                class="awards-carousel__marker"
+                data-carousel-marker={String(slide.idx)}
+                aria-label={t.work.goToSlide(slide.idx + 1)}
+                aria-current={slide.idx === 0 ? 'true' : undefined}
+              />
+            ))
+          }
+        </nav>
+        <p class="awards-carousel__count" data-carousel-count aria-hidden="true">
+          01 / {String(total).padStart(2, '0')}
+        </p>
+      </div>
     </div>
   </div>
 </section>

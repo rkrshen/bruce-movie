@@ -13,15 +13,15 @@ const t = getTranslations('zh-TW');
   description={t.notFound.description}
   noindex
 >
-  <Navbar locale="zh-TW" />
+  <Navbar locale="zh-TW" isLanding={false} />
   <main id="main-content" class="not-found" tabindex="-1">
-    <div class="container">
+    <div class="container not-found__inner">
       <p class="not-found__code" aria-hidden="true">404</p>
-      <h1 class="title">{t.notFound.heading}</h1>
-      <p class="description">{t.notFound.description}</p>
+      <h1 class="section-title">{t.notFound.heading}</h1>
+      <p class="section-lead">{t.notFound.description}</p>
       <div class="not-found__actions">
         <a class="btn-primary" href="/">{t.notFound.backHome}</a>
-        <a class="btn-primary" href="/en">{t.notFound.backEnglish}</a>
+        <a class="btn-secondary" href="/en">{t.notFound.backEnglish}</a>
       </div>
     </div>
   </main>

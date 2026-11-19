@@ -71,11 +71,11 @@ const organizationJsonLd = JSON.stringify({
 <html lang={t.lang}>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>{pageTitle}</title>
     <meta name="description" content={pageDescription} />
     <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow'} />
-    <meta name="theme-color" content="#2c2c2c" />
+    <meta name="theme-color" content="#0a0a0c" />
 
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png" />
 
@@ -125,6 +125,7 @@ const organizationJsonLd = JSON.stringify({
     <script is:inline type="application/ld+json" set:html={organizationJsonLd} />
   </head>
   <body>
+    <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
     <a class="skip-link visually-hidden" href="#main-content">
       {t.skipToContent}
     </a>

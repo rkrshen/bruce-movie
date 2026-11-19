@@ -18,40 +18,51 @@ const tabIconMap: Record<EffectTabKey, 'image' | 'globe' | 'action'> = {
 };
 ---
 
-<section class="section" id="award" aria-labelledby="effects-heading">
+<section class="section section-effects" id="award" tabindex="-1" aria-labelledby="effects-heading">
   <div class="container">
-    <h2 class="title text-center" id="effects-heading">{t.effect.title}</h2>
+    <header class="section-header" data-reveal>
+      <p class="section-eyebrow" aria-hidden="true">
+        <span class="section-eyebrow__num">04</span>
+        <span class="section-eyebrow__line"></span>
+        <span>{t.header.effect}</span>
+      </p>
+      <h2 class="section-title" id="effects-heading">{t.effect.title}</h2>
+    </header>
 
-    <div data-tabs-root>
-      <div class="effects-tablist" role="tablist" aria-label={t.effect.tabAriaLabel}>
-        {
-          EFFECT_TABS.map((tab, index) => {
-            const selected = index === 0;
-            const label = t.effect.tabs[tab.id];
-            return (
-              <button
-                type="button"
-                role="tab"
-                class="effect-pill-btn"
-                id={`effect-tab-${tab.id}`}
-                title={label}
-                aria-label={label}
-                aria-selected={selected ? 'true' : 'false'}
-                aria-controls={`effect-panel-${tab.id}`}
-                tabindex={selected ? 0 : -1}
-              >
-                <Icons name={tabIconMap[tab.id]} size={24} />
-                <span class="visually-hidden">{label}</span>
-              </button>
-            );
-          })
-        }
+    <div data-tabs-root data-animated-tabs>
+      <div class="effects-tablist-wrap">
+        <div class="effects-tablist" role="tablist" aria-label={t.effect.tabAriaLabel}>
+          <span class="effects-tab-indicator" data-tab-indicator aria-hidden="true"></span>
+          {
+            EFFECT_TABS.map((tab, index) => {
+              const selected = index === 0;
+              const label = t.effect.tabs[tab.id];
+              return (
+                <button
+                  type="button"
+                  role="tab"
+                  class="effect-pill-btn"
+                  id={`effect-tab-${tab.id}`}
+                  aria-selected={selected ? 'true' : 'false'}
+                  aria-controls={`effect-panel-${tab.id}`}
+                  tabindex={selected ? 0 : -1}
+                >
+                  <span class="effect-pill-btn__icon" aria-hidden="true">
+                    <Icons name={tabIconMap[tab.id]} size={18} />
+                  </span>
+                  <span class="effect-pill-btn__label">{label}</span>
+                </button>
+              );
+            })
+          }
+        </div>
       </div>
 
       <div class="effects-grid-wrap">
         {
           EFFECT_TABS.map((tab, index) => (
             <div
+              class="effects-panel"
               role="tabpanel"
               id={`effect-panel-${tab.id}`}
               aria-labelledby={`effect-tab-${tab.id}`}

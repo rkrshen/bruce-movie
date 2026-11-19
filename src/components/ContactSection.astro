@@ -1,4 +1,5 @@
 ---
+import { SITE } from '../data/site';
 import { getTranslations, type Locale } from '../i18n';
 import Icons from './Icons.astro';
 
@@ -8,121 +9,214 @@ interface Props {
 
 const { locale } = Astro.props;
 const t = getTranslations(locale);
-const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? '';
+
+const customEndpoint = (import.meta.env.PUBLIC_CONTACT_ENDPOINT ?? '').trim();
+const useServerApi = Boolean(customEndpoint);
+const contactEndpoint = useServerApi ? customEndpoint : SITE.web3formsEndpoint;
+const web3formsAccessKey =
+  (import.meta.env.PUBLIC_WEB3FORMS_ACCESS_KEY ?? '').trim() || SITE.web3formsAccessKey;
+const turnstileSiteKey = useServerApi
+  ? (import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? '').trim()
+  : '';
 ---
 
-<section class="section section-contact-us text-center" id="contact" aria-labelledby="contact-heading">
+<section class="section section-contact" id="contact" tabindex="-1" aria-labelledby="contact-heading">
   <div class="container">
-    <h2 class="title" id="contact-heading">{t.contact.title}</h2>
-    <p class="description">{t.contact.description}</p>
+    <div class="contact-card" data-reveal data-spotlight>
+      <div class="contact-card__info">
+        <p class="section-eyebrow section-eyebrow--start" aria-hidden="true">
+          <span class="section-eyebrow__num">06</span>
+          <span class="section-eyebrow__line"></span>
+          <span>{t.header.contact}</span>
+        </p>
+        <h2 class="section-title section-title--start" id="contact-heading">{t.contact.title}</h2>
+        <p class="contact-card__desc">{t.contact.description}</p>
 
-    <form
-      class="contact-form"
-      id="contact-form"
-      novalidate
-      data-locale={locale}
-      data-turnstile-enabled={turnstileSiteKey ? 'true' : 'false'}
-      data-msg-name={t.contact.validation.name}
-      data-msg-email-required={t.contact.validation.emailRequired}
-      data-msg-email-invalid={t.contact.validation.emailInvalid}
-      data-msg-message={t.contact.validation.message}
-      data-msg-validation={t.contact.status.validation}
-      data-msg-turnstile={t.contact.status.turnstileRequired}
-      data-msg-success={t.contact.status.success}
-      data-msg-error={t.contact.status.error}
-      data-label-submit={t.contact.submit}
-      data-label-sending={t.contact.sending}
-    >
-      <input
-        type="checkbox"
-        name="botcheck"
-        class="botcheck-field"
-        tabindex="-1"
-        autocomplete="off"
-        aria-hidden="true"
-      />
+        <div class="contact-channels">
+          <a class="contact-channel" href={SITE.phoneHref}>
+            <span class="contact-channel__icon" aria-hidden="true">
+              <Icons name="phone" size={18} />
+            </span>
+            <span class="contact-channel__body">
+              <span class="contact-channel__label">{t.footer.phone}</span>
+              <span class="contact-channel__value">{SITE.phoneDisplay}</span>
+            </span>
+          </a>
 
-      <div class="contact-field">
-        <label class="visually-hidden" for="contact-name">{t.contact.nameLabel}</label>
-        <div class="contact-input-pill" id="contact-name-wrap">
-          <span class="contact-input-icon" aria-hidden="true">
-            <Icons name="user" size={18} />
-          </span>
-          <input
-            id="contact-name"
-            name="name"
-            type="text"
-            class="contact-input"
-            autocomplete="name"
-            maxlength="100"
-            required
-            placeholder={t.contact.namePlaceholder}
-            aria-describedby="contact-name-error"
-          />
+          <div class="contact-channel contact-channel--email">
+            <a class="contact-channel__link" href={`mailto:${SITE.email}`}>
+              <span class="contact-channel__icon" aria-hidden="true">
+                <Icons name="mail" size={18} />
+              </span>
+              <span class="contact-channel__body">
+                <span class="contact-channel__label">{t.footer.email}</span>
+                <span class="contact-channel__value">{SITE.email}</span>
+              </span>
+            </a>
+
+            <button
+              type="button"
+              class="contact-copy-btn"
+              data-copy-text={SITE.email}
+              data-label-default={t.contact.copyEmail}
+              data-label-copied={t.contact.copiedEmail}
+              aria-label={t.contact.copyEmail}
+            >
+              <span class="contact-copy-btn__icon-copy" aria-hidden="true">
+                <Icons name="copy" size={15} />
+              </span>
+              <span class="contact-copy-btn__icon-check" aria-hidden="true">
+                <Icons name="check" size={15} />
+              </span>
+              <span class="contact-copy-btn__label">{t.contact.copyEmail}</span>
+            </button>
+          </div>
         </div>
-        <p class="contact-field-error" id="contact-name-error" hidden></p>
-      </div>
 
-      <div class="contact-field">
-        <label class="visually-hidden" for="contact-email">{t.contact.emailLabel}</label>
-        <div class="contact-input-pill" id="contact-email-wrap">
-          <span class="contact-input-icon" aria-hidden="true">
-            <Icons name="mail" size={18} />
-          </span>
-          <input
-            id="contact-email"
-            name="email"
-            type="email"
-            class="contact-input"
-            autocomplete="email"
-            maxlength="254"
-            required
-            placeholder={t.contact.emailPlaceholder}
-            aria-describedby="contact-email-error"
-          />
+        <div class="contact-socials">
+          <a
+            class="contact-social-pill"
+            href={SITE.social.facebook}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={t.header.facebookLabel}
+          >
+            <Icons name="facebook" size={16} />
+            <span>Facebook</span>
+          </a>
+          <a
+            class="contact-social-pill"
+            href={SITE.social.instagram}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={t.header.instagramLabel}
+          >
+            <Icons name="instagram" size={16} />
+            <span>Instagram</span>
+          </a>
         </div>
-        <p class="contact-field-error" id="contact-email-error" hidden></p>
       </div>
 
-      <div class="contact-field">
-        <label class="visually-hidden" for="contact-message">{t.contact.messageLabel}</label>
-        <textarea
-          id="contact-message"
-          name="message"
-          class="contact-textarea"
-          rows="4"
-          maxlength="3000"
-          required
-          placeholder={t.contact.messagePlaceholder}
-          aria-describedby="contact-message-error"
-        ></textarea>
-        <p class="contact-field-error" id="contact-message-error" hidden></p>
-      </div>
+      <form
+        class="contact-form"
+        id="contact-form"
+        novalidate
+        data-locale={locale}
+        data-mode={useServerApi ? 'server' : 'web3forms'}
+        data-endpoint={contactEndpoint}
+        data-access-key={useServerApi ? '' : web3formsAccessKey}
+        data-subject={t.contact.subject}
+        data-from-name={t.contact.fromName}
+        data-turnstile-enabled={turnstileSiteKey ? 'true' : 'false'}
+        data-msg-name={t.contact.validation.name}
+        data-msg-email-required={t.contact.validation.emailRequired}
+        data-msg-email-invalid={t.contact.validation.emailInvalid}
+        data-msg-message={t.contact.validation.message}
+        data-msg-validation={t.contact.status.validation}
+        data-msg-turnstile={t.contact.status.turnstileRequired}
+        data-msg-success={t.contact.status.success}
+        data-msg-error={t.contact.status.error}
+        data-label-submit={t.contact.submit}
+        data-label-sending={t.contact.sending}
+      >
+        <input
+          type="checkbox"
+          name="botcheck"
+          class="botcheck-field"
+          tabindex="-1"
+          autocomplete="off"
+          aria-hidden="true"
+        />
 
-      {
-        turnstileSiteKey && (
-          <div class="turnstile-wrapper" aria-label={t.contact.turnstileLabel}>
-            <div
-              class="cf-turnstile"
-              data-sitekey={turnstileSiteKey}
-              data-theme="dark"
-              data-language={locale === 'en' ? 'en' : 'zh-tw'}
+        <div class="contact-field">
+          <label class="contact-label" for="contact-name">{t.contact.nameLabel}</label>
+          <div class="contact-input-box" id="contact-name-wrap">
+            <span class="contact-input-icon" aria-hidden="true">
+              <Icons name="user" size={18} />
+            </span>
+            <input
+              id="contact-name"
+              name="name"
+              type="text"
+              class="contact-input"
+              autocomplete="name"
+              maxlength="100"
+              required
+              aria-invalid="false"
+              data-error="contact-name-error"
+              placeholder={t.contact.namePlaceholder}
             />
           </div>
-        )
-      }
+          <p class="contact-field-error" id="contact-name-error" hidden></p>
+        </div>
 
-      <p
-        class="contact-status"
-        id="contact-status"
-        role="status"
-        aria-live="polite"
-      ></p>
+        <div class="contact-field">
+          <label class="contact-label" for="contact-email">{t.contact.emailLabel}</label>
+          <div class="contact-input-box" id="contact-email-wrap">
+            <span class="contact-input-icon" aria-hidden="true">
+              <Icons name="mail" size={18} />
+            </span>
+            <input
+              id="contact-email"
+              name="email"
+              type="email"
+              class="contact-input"
+              autocomplete="email"
+              inputmode="email"
+              maxlength="254"
+              required
+              aria-invalid="false"
+              data-error="contact-email-error"
+              placeholder={t.contact.emailPlaceholder}
+            />
+          </div>
+          <p class="contact-field-error" id="contact-email-error" hidden></p>
+        </div>
 
-      <button type="submit" class="btn-primary" id="contact-submit">
-        {t.contact.submit}
-      </button>
-    </form>
+        <div class="contact-field">
+          <label class="contact-label" for="contact-message">{t.contact.messageLabel}</label>
+          <textarea
+            id="contact-message"
+            name="message"
+            class="contact-textarea"
+            rows="4"
+            maxlength="3000"
+            required
+            aria-invalid="false"
+            data-error="contact-message-error"
+            placeholder={t.contact.messagePlaceholder}
+          ></textarea>
+          <p class="contact-field-error" id="contact-message-error" hidden></p>
+        </div>
+
+        {
+          turnstileSiteKey && (
+            <div class="turnstile-wrapper" aria-label={t.contact.turnstileLabel}>
+              <div
+                class="cf-turnstile"
+                data-sitekey={turnstileSiteKey}
+                data-theme="dark"
+                data-language={locale === 'en' ? 'en' : 'zh-tw'}
+              />
+            </div>
+          )
+        }
+
+        <p
+          class="contact-status"
+          id="contact-status"
+          role="status"
+          aria-live="polite"
+        ></p>
+
+        <button type="submit" class="btn-primary" id="contact-submit">
+          <span class="btn-primary__text" data-submit-label>{t.contact.submit}</span>
+          <span class="btn-primary__icon" aria-hidden="true">
+            <Icons name="send" size={16} />
+          </span>
+        </button>
+      </form>
+    </div>
   </div>
 </section>
 

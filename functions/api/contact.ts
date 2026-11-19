@@ -1,5 +1,27 @@
+/**
+ * Optional Cloudflare Pages Function for server-side contact email delivery.
+ *
+ * IMPORTANT:
+ * Web3Forms Free plan explicitly rejects server-side / Cloudflare Workers
+ * requests with HTTP 403 ("Use our API in client side or contact support with
+ * server IP address (Pro plan is required)").
+ *
+ * Therefore, by default the frontend submits directly from the browser to
+ * Web3Forms (which works on both GitHub Pages and Cloudflare Pages).
+ *
+ * To route submissions through this server-side endpoint with Cloudflare
+ * Turnstile protection instead, configure:
+ *   - PUBLIC_CONTACT_ENDPOINT=/api/contact
+ *   - RESEND_API_KEY (Cloudflare Pages Encrypted Secret)
+ *   - CONTACT_FROM_EMAIL (e.g. "Bruce Movie <noreply@brucemovie.com>")
+ *   - CONTACT_TO_EMAIL (default: "brucemovie@gmail.com")
+ *   - Optional: PUBLIC_TURNSTILE_SITE_KEY + TURNSTILE_SECRET_KEY
+ */
+
 interface Env {
-  WEB3FORMS_ACCESS_KEY?: string;
+  RESEND_API_KEY?: string;
+  CONTACT_FROM_EMAIL?: string;
+  CONTACT_TO_EMAIL?: string;
   TURNSTILE_SECRET_KEY?: string;
 }
 
@@ -26,14 +48,12 @@ function isAllowedOrigin(origin: string | null, requestUrl: URL): boolean {
   if (!origin) return false;
   if (ALLOWED_ORIGINS.has(origin)) return true;
   if (origin === requestUrl.origin) return true;
-  // Allow Cloudflare Pages preview deployments for this project
   if (/^https:\/\/[a-z0-9-]+\.pages\.dev$/i.test(origin)) return true;
   return false;
 }
 
 function sanitizeText(input: unknown): string {
   if (typeof input !== 'string') return '';
-  // Strip ASCII control characters except tab/newline
   return input.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').trim();
 }
 
@@ -70,7 +90,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 
   // Honeypot trap: silently pretend success to confuse automated spam bots
-  if (payload.botcheck === true || (typeof payload.botcheck === 'string' && payload.botcheck.length > 0)) {
+  if (
+    payload.botcheck === true ||
+    (typeof payload.botcheck === 'string' && payload.botcheck.length > 0)
+  ) {
     return jsonResponse({ success: true }, 200);
   }
 
@@ -124,34 +147,44 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
   }
 
-  if (!env.WEB3FORMS_ACCESS_KEY) {
+  if (!env.RESEND_API_KEY) {
     return jsonResponse({ success: false, code: 'SERVICE_UNAVAILABLE' }, 503);
   }
 
-  const upstreamRes = await fetch('https://api.web3forms.com/submit', {
+  const toEmail = env.CONTACT_TO_EMAIL || 'brucemovie@gmail.com';
+  const fromEmail = env.CONTACT_FROM_EMAIL || 'Bruce Movie Website <noreply@brucemovie.com>';
+  const subject =
+    locale === 'en'
+      ? `[Bruce Movie] New inquiry from ${name}`
+      : `[澤影映像官網] 來自 ${name} 的合作詢問`;
+
+  const textBody = [
+    locale === 'en' ? 'New website contact inquiry' : '官網聯絡表單新來信',
+    '----------------------------------------',
+    `${locale === 'en' ? 'Name' : '稱呼'}: ${name}`,
+    `Email: ${email}`,
+    '',
+    locale === 'en' ? 'Message:' : '訊息內容：',
+    message,
+  ].join('\n');
+
+  const upstreamRes = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
+      Authorization: `Bearer ${env.RESEND_API_KEY}`,
       'Content-Type': 'application/json',
-      Accept: 'application/json',
     },
     body: JSON.stringify({
-      access_key: env.WEB3FORMS_ACCESS_KEY,
-      subject: locale === 'en' ? 'New message from Bruce Movie website' : '官網聯絡表單來信',
-      from_name: locale === 'en' ? 'Bruce Movie Website' : '澤影映像官網',
-      name,
-      email,
-      message,
-      botcheck: false,
+      from: fromEmail,
+      to: [toEmail],
+      reply_to: email,
+      subject,
+      text: textBody,
     }),
   });
 
   if (!upstreamRes.ok) {
     return jsonResponse({ success: false, code: 'UPSTREAM_ERROR' }, 502);
-  }
-
-  const upstreamData = (await upstreamRes.json()) as { success?: boolean };
-  if (!upstreamData.success) {
-    return jsonResponse({ success: false, code: 'UPSTREAM_REJECTED' }, 502);
   }
 
   return jsonResponse({ success: true }, 200);

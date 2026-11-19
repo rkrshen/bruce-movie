@@ -9,84 +9,93 @@ interface Props {
 
 const { locale } = Astro.props;
 const t = getTranslations(locale);
+
+const pillars = [
+  { num: '01', heading: t.intro.team, body: t.intro.paragraph2 },
+  { num: '02', heading: t.intro.legitimate, body: t.intro.paragraph3 },
+  { num: '03', heading: t.intro.founder, body: t.intro.paragraph1 },
+];
 ---
 
-<section class="section" id="about" aria-labelledby="about-heading">
+<section class="section section-about" id="about" tabindex="-1" aria-labelledby="about-heading">
   <div class="container">
-    <div class="about-header">
-      <h2 class="title" id="about-heading">{t.about.title}</h2>
-      <p class="description">{t.about.description}</p>
-    </div>
+    <header class="section-header section-header--wide" data-reveal>
+      <p class="section-eyebrow" aria-hidden="true">
+        <span class="section-eyebrow__num">01</span>
+        <span class="section-eyebrow__line"></span>
+        <span>{t.header.intro}</span>
+      </p>
+      <h2 class="section-title section-title--hero" id="about-heading">{t.about.title}</h2>
+      <p class="section-lead">{t.about.description}</p>
+    </header>
 
-    <div class="section-story-overview">
-      <div class="story-row">
-        <div class="story-col-left">
-          <div class="story-image-container story-image-container--left">
-            <div class="story-image-wrap">
-              <Image
-                src={BRAND_IMAGES.founderImg}
-                alt={t.media.founderAlt}
-                widths={[480, 586]}
-                sizes="(min-width: 768px) 52vw, 100vw"
-                format="webp"
-                quality={82}
-                loading="lazy"
-                decoding="async"
-                class="story-image"
-              />
-            </div>
+    <div class="about-bento">
+      <div class="about-visual-col">
+        <figure class="media-card media-card--founder" data-reveal>
+          <Image
+            src={BRAND_IMAGES.founderImg}
+            alt={t.media.founderAlt}
+            widths={[480, 586]}
+            sizes="(min-width: 992px) 46vw, 100vw"
+            format="webp"
+            quality={84}
+            loading="lazy"
+            decoding="async"
+            class="media-card__img"
+          />
+        </figure>
 
-            <blockquote class="blockquote-primary">
-              <p>
-                {t.story.line1}<br />
-                {t.story.line2}<br />
-                {t.story.line3}
-              </p>
-              <footer>{t.story.founder}</footer>
-            </blockquote>
+        <blockquote class="manifesto-quote" data-reveal data-spotlight>
+          <span class="manifesto-quote__mark" aria-hidden="true">“</span>
+          <div class="manifesto-quote__lines">
+            <p>{t.story.line1}</p>
+            <p>{t.story.line2}</p>
+            <p>{t.story.line3}</p>
           </div>
+          <footer class="manifesto-quote__author">{t.story.founder}</footer>
+        </blockquote>
 
-          <div class="story-image-container story-bts">
-            <Image
-              src={BRAND_IMAGES.behindScenesImg}
-              alt={t.media.behindScenesAlt}
-              widths={[480, 602]}
-              sizes="(min-width: 768px) 48vw, 100vw"
-              format="webp"
-              quality={82}
-              loading="lazy"
-              decoding="async"
-              class="story-image"
-            />
-          </div>
-        </div>
-
-        <div class="story-col-right">
-          <div class="story-image-container story-image-container--right">
+        <div class="about-secondary-media">
+          <figure class="media-card media-card--award" data-reveal>
             <Image
               src={BRAND_IMAGES.awardMainImg}
               alt={t.media.awardAlt}
               widths={[480, 716]}
-              sizes="(min-width: 768px) 48vw, 100vw"
+              sizes="(min-width: 992px) 46vw, 100vw"
+              format="webp"
+              quality={86}
+              loading="lazy"
+              decoding="async"
+              class="media-card__img"
+            />
+          </figure>
+
+          <figure class="media-card media-card--bts" data-reveal>
+            <Image
+              src={BRAND_IMAGES.behindScenesImg}
+              alt={t.media.behindScenesAlt}
+              widths={[480, 602]}
+              sizes="(min-width: 992px) 46vw, 100vw"
               format="webp"
               quality={84}
               loading="lazy"
               decoding="async"
-              class="story-image"
+              class="media-card__img"
             />
-          </div>
-
-          <div class="story-copy">
-            <h3>{t.intro.team}</h3>
-            <p>{t.intro.paragraph2}</p>
-
-            <h3>{t.intro.legitimate}</h3>
-            <p>{t.intro.paragraph3}</p>
-
-            <h3>{t.intro.founder}</h3>
-            <p>{t.intro.paragraph1}</p>
-          </div>
+          </figure>
         </div>
+      </div>
+
+      <div class="about-pillars-col">
+        {
+          pillars.map((pillar) => (
+            <article class="pillar-card" data-reveal data-spotlight>
+              <span class="pillar-card__num" aria-hidden="true">{pillar.num}</span>
+              <h3 class="pillar-card__title">{pillar.heading}</h3>
+              <p class="pillar-card__body">{pillar.body}</p>
+            </article>
+          ))
+        }
       </div>
     </div>
   </div>

@@ -7,29 +7,27 @@ import Icons from './Icons.astro';
 
 interface Props {
   locale: Locale;
+  isLanding?: boolean;
 }
 
-const { locale } = Astro.props;
+const { locale, isLanding = true } = Astro.props;
 const t = getTranslations(locale);
 const homeHref = locale === 'en' ? '/en' : '/';
 const switchHref = locale === 'en' ? '/' : '/en';
+const anchorPrefix = isLanding ? '' : homeHref;
 
 const navItems = [
-  { href: `${homeHref}#about`, label: t.header.intro },
-  { href: `${homeHref}#report`, label: t.header.report },
-  { href: `${homeHref}#activity`, label: t.header.activity },
-  { href: `${homeHref}#award`, label: t.header.effect },
-  { href: `${homeHref}#work`, label: t.header.work },
-  { href: `${homeHref}#contact`, label: t.header.contact },
+  { id: 'about', index: '01', href: `${anchorPrefix}#about`, label: t.header.intro },
+  { id: 'report', index: '02', href: `${anchorPrefix}#report`, label: t.header.report },
+  { id: 'activity', index: '03', href: `${anchorPrefix}#activity`, label: t.header.activity },
+  { id: 'award', index: '04', href: `${anchorPrefix}#award`, label: t.header.effect },
+  { id: 'work', index: '05', href: `${anchorPrefix}#work`, label: t.header.work },
+  { id: 'contact', index: '06', href: `${anchorPrefix}#contact`, label: t.header.contact },
 ];
 ---
 
-<header>
-  <nav
-    class="navbar navbar-transparent"
-    id="site-header"
-    aria-label={t.header.navAriaLabel}
-  >
+<header class="site-header" id="site-header">
+  <nav class="navbar" aria-label={t.header.navAriaLabel}>
     <div class="container navbar-inner">
       <a class="navbar-brand" href={homeHref} aria-label={t.header.brandAlt}>
         <Image
@@ -40,69 +38,171 @@ const navItems = [
           format="webp"
           quality={88}
           loading="eager"
+          class="navbar-logo"
         />
       </a>
 
-      <button
-        type="button"
-        class="navbar-toggler"
-        id="nav-toggle"
-        aria-expanded="false"
-        aria-controls="nav-menu"
-        aria-label={t.header.menuToggleLabel}
-      >
-        <Icons name="menu" size={24} />
-      </button>
-
-      <div class="navbar-collapse" id="nav-menu">
-        <ul class="navbar-nav">
+      <div class="navbar-desktop">
+        <ul class="navbar-nav" data-scrollspy-nav>
           {
             navItems.map((item) => (
               <li class="nav-item">
-                <a class="nav-link" href={item.href}>
-                  {item.label}
+                <a class="nav-link" href={item.href} data-section-link={item.id}>
+                  <span class="nav-link__text">{item.label}</span>
                 </a>
               </li>
             ))
           }
-          <li class="nav-item">
-            <a
-              class="nav-link nav-link--icon"
-              href={SITE.social.facebook}
-              target="_blank"
-              rel="noopener noreferrer"
-              title="Like us on Facebook"
-              aria-label={t.header.facebookLabel}
-            >
-              <Icons name="facebook" size={18} />
-              <span class="nav-icon-text">Facebook</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a
-              class="nav-link nav-link--icon"
-              href={SITE.social.instagram}
-              target="_blank"
-              rel="noopener noreferrer"
-              title="Follow us on Instagram"
-              aria-label={t.header.instagramLabel}
-            >
-              <Icons name="instagram" size={18} />
-              <span class="nav-icon-text">Instagram</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a
-              class="nav-link"
-              href={switchHref}
-              hreflang={locale === 'en' ? 'zh-TW' : 'en'}
-              aria-label={t.header.switchLanguageAria}
-            >
-              {t.header.switchLanguage}
-            </a>
-          </li>
         </ul>
+
+        <div class="navbar-utilities">
+          <a
+            class="nav-icon-btn"
+            href={SITE.social.facebook}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Facebook"
+            aria-label={t.header.facebookLabel}
+          >
+            <Icons name="facebook" size={17} />
+          </a>
+          <a
+            class="nav-icon-btn"
+            href={SITE.social.instagram}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Instagram"
+            aria-label={t.header.instagramLabel}
+          >
+            <Icons name="instagram" size={17} />
+          </a>
+          <a
+            class="nav-lang-pill"
+            href={switchHref}
+            hreflang={locale === 'en' ? 'zh-TW' : 'en'}
+            aria-label={t.header.switchLanguageAria}
+          >
+            {t.header.switchLanguage}
+          </a>
+        </div>
+      </div>
+
+      <div class="navbar-mobile-actions">
+        <a
+          class="nav-lang-pill nav-lang-pill--compact"
+          href={switchHref}
+          hreflang={locale === 'en' ? 'zh-TW' : 'en'}
+          aria-label={t.header.switchLanguageAria}
+        >
+          {locale === 'en' ? '中文' : 'EN'}
+        </a>
+        <button
+          type="button"
+          class="navbar-toggler"
+          id="nav-toggle"
+          aria-expanded="false"
+          aria-controls="mobile-nav-drawer"
+          aria-label={t.header.menuToggleLabel}
+        >
+          <Icons name="menu" size={22} />
+        </button>
       </div>
     </div>
   </nav>
 </header>
+
+<dialog
+  class="mobile-drawer"
+  id="mobile-nav-drawer"
+  aria-label={t.header.drawerLabel}
+  closedby="any"
+>
+  <div class="mobile-drawer__panel">
+    <div class="mobile-drawer__head">
+      <a class="mobile-drawer__brand" href={homeHref} aria-label={t.header.brandAlt}>
+        <Image
+          src={BRAND_IMAGES.logoImg}
+          alt={t.header.brandAlt}
+          width={160}
+          height={89}
+          format="webp"
+          quality={85}
+          loading="lazy"
+          class="navbar-logo"
+        />
+      </a>
+      <button
+        type="button"
+        class="mobile-drawer__close"
+        id="nav-drawer-close"
+        aria-label={t.header.closeMenuLabel}
+        autofocus
+      >
+        <Icons name="close" size={22} />
+      </button>
+    </div>
+
+    <nav class="mobile-drawer__nav" aria-label={t.header.navAriaLabel}>
+      <ul class="mobile-drawer__list">
+        {
+          navItems.map((item) => (
+            <li>
+              <a class="mobile-drawer__link" href={item.href} data-drawer-link>
+                <span class="mobile-drawer__index" aria-hidden="true">{item.index}</span>
+                <span class="mobile-drawer__label">{item.label}</span>
+                <span class="mobile-drawer__arrow" aria-hidden="true">
+                  <Icons name="chevron-right" size={16} />
+                </span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="mobile-drawer__footer">
+      <div class="mobile-drawer__quick-contact">
+        <a href={SITE.phoneHref} class="mobile-drawer__contact-pill">
+          <Icons name="phone" size={16} />
+          <span>{SITE.phoneDisplay}</span>
+        </a>
+        <a href={`mailto:${SITE.email}`} class="mobile-drawer__contact-pill">
+          <Icons name="mail" size={16} />
+          <span>{SITE.email}</span>
+        </a>
+      </div>
+
+      <div class="mobile-drawer__socials">
+        <a
+          class="mobile-drawer__social"
+          href={SITE.social.facebook}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={t.header.facebookLabel}
+        >
+          <Icons name="facebook" size={18} />
+          <span>Facebook</span>
+        </a>
+        <a
+          class="mobile-drawer__social"
+          href={SITE.social.instagram}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={t.header.instagramLabel}
+        >
+          <Icons name="instagram" size={18} />
+          <span>Instagram</span>
+        </a>
+      </div>
+
+      <a
+        class="mobile-drawer__lang"
+        href={switchHref}
+        hreflang={locale === 'en' ? 'zh-TW' : 'en'}
+        aria-label={t.header.switchLanguageAria}
+      >
+        {t.header.switchLanguage}
+      </a>
+    </div>
+  </div>
+</dialog>

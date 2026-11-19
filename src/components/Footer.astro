@@ -1,6 +1,9 @@
 ---
+import { Image } from 'astro:assets';
 import { SITE } from '../data/site';
+import { BRAND_IMAGES } from '../data/content';
 import { getTranslations, type Locale } from '../i18n';
+import Icons from './Icons.astro';
 
 interface Props {
   locale: Locale;
@@ -9,23 +12,80 @@ interface Props {
 const { locale } = Astro.props;
 const t = getTranslations(locale);
 const year = new Date().getFullYear();
+const homeHref = locale === 'en' ? '/en' : '/';
+const switchHref = locale === 'en' ? '/' : '/en';
 ---
 
 <footer class="footer">
   <div class="container footer-inner">
-    <ul class="footer-contact" role="list">
-      <li>
-        <span>{t.footer.phone}</span>
-        <a href={SITE.phoneHref}>{SITE.phoneDisplay}</a>
-      </li>
-      <li>
-        <span>{t.footer.email}</span>
-        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
-      </li>
-    </ul>
+    <div class="footer-brand-block">
+      <a class="footer-brand" href={homeHref} aria-label={t.header.brandAlt}>
+        <Image
+          src={BRAND_IMAGES.logoImg}
+          alt={t.header.brandAlt}
+          width={180}
+          height={100}
+          format="webp"
+          quality={85}
+          loading="lazy"
+          class="navbar-logo"
+        />
+      </a>
+      <ul class="footer-contact" role="list">
+        <li>
+          <span class="footer-contact__label">{t.footer.phone}</span>
+          <a href={SITE.phoneHref}>{SITE.phoneDisplay}</a>
+        </li>
+        <li>
+          <span class="footer-contact__label">{t.footer.email}</span>
+          <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+        </li>
+      </ul>
+    </div>
 
-    <p class="footer-copyright">
-      Bruce Movie Special Effects CO., LTD. &copy; {year}
-    </p>
+    <div class="footer-meta">
+      <div class="footer-links">
+        <a
+          class="footer-social"
+          href={SITE.social.facebook}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={t.header.facebookLabel}
+        >
+          <Icons name="facebook" size={17} />
+        </a>
+        <a
+          class="footer-social"
+          href={SITE.social.instagram}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={t.header.instagramLabel}
+        >
+          <Icons name="instagram" size={17} />
+        </a>
+        <a
+          class="footer-lang"
+          href={switchHref}
+          hreflang={locale === 'en' ? 'zh-TW' : 'en'}
+          aria-label={t.header.switchLanguageAria}
+        >
+          {t.header.switchLanguage}
+        </a>
+      </div>
+
+      <p class="footer-copyright">
+        Bruce Movie Special Effects CO., LTD. &copy; {year}
+      </p>
+    </div>
   </div>
 </footer>
+
+<button
+  type="button"
+  class="back-to-top"
+  id="back-to-top"
+  aria-label={t.contact.backToTop}
+  hidden
+>
+  <Icons name="arrow-up" size={18} />
+</button>

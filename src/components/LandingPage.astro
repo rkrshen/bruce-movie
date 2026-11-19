@@ -10,6 +10,7 @@ import AwardsCarousel from './AwardsCarousel.astro';
 import RecordsSection from './RecordsSection.astro';
 import ContactSection from './ContactSection.astro';
 import Footer from './Footer.astro';
+import LightboxDialog from './LightboxDialog.astro';
 import type { Locale } from '../i18n';
 
 interface Props {
@@ -20,7 +21,7 @@ const { locale } = Astro.props;
 ---
 
 <BaseLayout locale={locale} preloadHero>
-  <Navbar locale={locale} />
+  <Navbar locale={locale} isLanding />
   <main id="main-content" tabindex="-1">
     <Hero locale={locale} />
     <AboutSection locale={locale} />
@@ -32,4 +33,5 @@ const { locale } = Astro.props;
     <ContactSection locale={locale} />
   </main>
   <Footer locale={locale} />
+  <LightboxDialog locale={locale} />
 </BaseLayout>
