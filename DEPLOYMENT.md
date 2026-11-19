@@ -24,7 +24,7 @@
    - **Build command**：`npm run build`
    - **Build output directory**：`dist`
    - **Environment variables（Production & Preview）**：
-     - `NODE_VERSION` = `22`
+     - 專案根目錄已內建 `.node-version`（`24`），Cloudflare Pages 會自動採用 Node 24（亦可額外設定 `NODE_VERSION` = `24`）
 3. 點擊 **Save and Deploy**，確認 `*.pages.dev` 預覽網址運作正常（含 `/`、`/en`、`/404`）。
 
 ---
