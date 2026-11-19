@@ -1,93 +1,107 @@
-# Cloudflare Pages 部署與網域安全強化指南
+# Cloudflare Pages 正式環境架構與部署維運手冊
 
-本指南協助您在不更換原網域 `brucemovie.com` 的前提下，零停機將網站遷移至 **Cloudflare（免費方案）+ Cloudflare Pages**，一次完成 HTTPS 安全標頭、`www` 轉址、表單 Turnstile 防護與 DNS 郵件防偽設定。
-
----
-
-## 步驟一：將 `brucemovie.com` DNS 接入 Cloudflare（免費方案）
-
-1. 登入 [Cloudflare Dashboard](https://dash.cloudflare.com/) → **Add a site** → 輸入 `brucemovie.com` → 選擇 **Free** 方案。
-2. Cloudflare 會自動掃描現有 Gandi DNS 紀錄，**請務必核對以下紀錄完整保留（避免公司收信與 Google Search Console 中斷）**：
-   - `MX` `brucemovie.com` → `10 spool.mail.gandi.net`、`50 fb.mail.gandi.net`
-   - `TXT` `brucemovie.com` → `google-site-verification=qRXoIr7WV-rCE23IDDOKTnRx79Z4o6M8ITsoIckkB6M`
-3. 依 Cloudflare 指示，到 **Gandi 網域後台**將 `brucemovie.com` 的 Nameservers 改為 Cloudflare 提供的兩組 NS。
-4. 等待狀態變為 **Active**（通常 15 分鐘～數小時）。
+本文件記錄 `brucemovie.com` 正式站於 **Cloudflare DNS + Cloudflare Pages** 的目前線上架構設定、日常自動化 CI/CD 部署流程、緊急回滾方式，以及聯絡表單與郵件安全設定。
 
 ---
 
-## 步驟二：在 Cloudflare Pages 建立專案並部署
+## 一、目前正式環境設定總覽（已於 2026-11-19 完成上線）
 
-1. 在 Cloudflare Dashboard 進入 **Workers & Pages → Create → Pages → Connect to Git**。
-2. 選擇 GitHub 倉庫 `rkrshen/rkrshen.github.io`，設定如下：
-   - **Production branch**：`master`
-   - **Framework preset**：`Astro`
-   - **Build command**：`npm run build`
-   - **Build output directory**：`dist`
-   - **Environment variables（Production & Preview）**：
-     - 專案根目錄已內建 `.node-version`（`24`），Cloudflare Pages 會自動採用 Node 24（亦可額外設定 `NODE_VERSION` = `24`）
-3. 點擊 **Save and Deploy**，確認 `*.pages.dev` 預覽網址運作正常（含 `/`、`/en`、`/404`）。
+| 項目 | 目前線上設定值 |
+| :--- | :--- |
+| **正式主網域** | `https://brucemovie.com`（中：`/`、英：`/en`） |
+| **次要網域** | `https://www.brucemovie.com`（已綁定 SSL 憑證） |
+| **Cloudflare Pages 專案名稱** | `bruce-movie`（預覽網址：`https://bruce-movie.pages.dev`） |
+| **GitHub 連動倉庫** | `rkrshen/rkrshen.github.io` |
+| **正式環境分支（Production branch）** | `master` |
+| **日常開發分支（Development branch）** | `develop` |
+| **Node.js 執行環境版本** | Node `24`（由根目錄 [`.node-version`](./.node-version) 自動指定） |
+| **組建命令（Build command）** | `npm run build` |
+| **組建輸出目錄（Build output directory）** | `dist` |
+| **網域註冊商** | Gandi.net（僅代管網域註冊與公司信箱 `MX` / `SRV`） |
+| **Cloudflare 權威名稱伺服器（Nameservers）** | `elinore.ns.cloudflare.com`、`rajeev.ns.cloudflare.com` |
 
 ---
 
-## 步驟三：聯絡表單寄信設定（Web3Forms 預設直連 / 選配 Resend + Turnstile 後端）
+## 二、日常開發後的部署與維運流程
 
-> ℹ️ **重要技術說明（已實測驗證）**：Web3Forms 免費方案會阻擋所有伺服器端（含 Cloudflare Workers / Pages Functions）發出的 `POST` 請求並回傳 `HTTP 403`；其 `access_key` 本身即為官方設計的前端公開表單識別碼（搭配 Honeypot 與瀏覽器直連寄信）。
->
-> - **預設模式（開箱即用、免額外設定）**：聯絡表單已預設透過瀏覽器直連 `https://api.web3forms.com/submit` 寄信至 `brucemovie@gmail.com`（於本機預覽、GitHub Pages 與 Cloudflare Pages 皆可正常寄出）。若需更換 Web3Forms 金鑰，只要在環境變數設定 `PUBLIC_WEB3FORMS_ACCESS_KEY` 或更新 [`src/data/site.ts`](./src/data/site.ts) 即可。
-> - **進階後端模式（選配：Cloudflare Pages Function + Resend + Turnstile）**：若希望完全改由伺服器端寄信並啟用 Cloudflare Turnstile，請完成以下設定：
+### 1. 標準發布流程（`develop` → `master`）
 
+1. **在 `develop` 分支開發與驗證**：
+   ```bash
+   git checkout develop
+   git pull origin develop
+   # 修改程式碼或文案後，於本機執行靜態型別檢查與建置驗證
+   npm run check && npm run build
+   ```
+2. **暫存推送（不部署正式站）**：
+   - 若僅想把進度推上 GitHub 備份、不想觸發任何 CI 或 Cloudflare 預覽建置，請在 commit 訊息加上 `[CF Pages Skip] [skip ci]`：
+     ```bash
+     git commit -m "chore: save WIP [CF Pages Skip] [skip ci]"
+     git push origin develop
+     ```
+3. **合併至 `master` 自動部署正式站**：
+   ```bash
+   git checkout master
+   git pull origin master
+   git merge develop
+   git push origin master
+   ```
+   - 推送至 `master` 後：
+     - **GitHub Actions CI**（[`.github/workflows/ci.yml`](./.github/workflows/ci.yml)）會自動執行 `npm audit`、`npm run check` 與 `npm run build`。
+     - **Cloudflare Pages** 會自動偵測 `master` 更新，於約 1 分鐘內完成建置並發布至 `https://brucemovie.com`。
+
+### 2. 版本一鍵回滾（Rollback）
+
+若新版本上線後發現內容需退回上一版：
+1. 登入 [Cloudflare Dashboard](https://dash.cloudflare.com/) → **Workers & Pages → `bruce-movie` → 部署（Deployments）**。
+2. 找到先前任一筆成功的 Production 部署紀錄，點擊右側 **`⋯` → 回滾至此部署（Rollback to this deployment）**，即可在數秒內無停機切換回舊版。
+
+---
+
+## 三、聯絡表單寄信架構與選配升級
+
+> ℹ️ **技術背景（已實測驗證）**：Web3Forms 免費方案會阻擋所有伺服器端（含 Cloudflare Workers / Pages Functions）發出的 `POST` 請求並回傳 `HTTP 403`；其 `access_key` 本身即為官方設計的前端公開表單識別碼。
+
+### 1. 目前線上模式：Web3Forms 瀏覽器直連（預設、免設環境變數）
+- 前端表單直接向 `https://api.web3forms.com/submit` 發送 JSON 請求，寄信至 `brucemovie@gmail.com`（已於正式站實測收信正常）。
+- 若日後需更換 Web3Forms Access Key，可於 **Cloudflare Pages → `bruce-movie` → 設定 → 環境變數** 新增 `PUBLIC_WEB3FORMS_ACCESS_KEY`（或直接修改 [`src/data/site.ts`](./src/data/site.ts) 中的 `web3formsAccessKey`）並重新部署。
+
+### 2. 進階後端模式（選配：Cloudflare Pages Function + Resend + Turnstile）
+若未來希望改由伺服器端 [`functions/api/contact.ts`](./functions/api/contact.ts) 寄信並加上 Cloudflare Turnstile 人機驗證：
 1. 在 [Resend](https://resend.com/) 驗證 `brucemovie.com` 網域並取得 API Key（免費方案每月 3,000 封）。
-2. 在 Cloudflare Dashboard 進入 **Turnstile → Add widget**（`Domain`: `brucemovie.com`，`Widget Mode`: `Managed`），取得 **Site Key** 與 **Secret Key**。
-3. 回到 **Cloudflare Pages 專案 → Settings → Variables and Secrets**，設定以下變數並重新部署：
+2. 在 Cloudflare Dashboard → **Turnstile → Add widget**（`Domain`: `brucemovie.com`，`Widget Mode`: `Managed`）取得 **Site Key** 與 **Secret Key**。
+3. 在 **Cloudflare Pages → `bruce-movie` → 設定 → 變數與機密（Variables and Secrets）** 設定以下變數並重新部署：
 
 | 變數名稱 | 類型 | 說明 |
 | :--- | :--- | :--- |
 | `PUBLIC_CONTACT_ENDPOINT` | Plaintext（公開） | 設為 `/api/contact` 以切換至伺服器端寄信模式 |
 | `PUBLIC_TURNSTILE_SITE_KEY` | Plaintext（公開） | Turnstile Site Key（前端顯示驗證元件用） |
-| `TURNSTILE_SECRET_KEY` | **Secret（加密）** | Turnstile Secret Key（`functions/api/contact.ts` 後端驗證用） |
-| `RESEND_API_KEY` | **Secret（加密）** | Resend API Key（僅存於伺服器端，不外洩至瀏覽器） |
+| `TURNSTILE_SECRET_KEY` | **Secret（加密）** | Turnstile Secret Key（後端驗證用） |
+| `RESEND_API_KEY` | **Secret（加密）** | Resend API Key（僅存於伺服器端） |
 | `CONTACT_FROM_EMAIL` | Plaintext（公開） | 寄件人（如 `Bruce Movie <noreply@brucemovie.com>`） |
 | `CONTACT_TO_EMAIL` | Plaintext（公開） | 收件人（預設 `brucemovie@gmail.com`） |
 
 ---
 
-## 步驟四：綁定自訂網域 `brucemovie.com` 與 `www` HTTPS 轉址
+## 四、DNS 與網域安全進階設定（Cloudflare DNS）
 
-1. 進入 **Cloudflare Pages 專案 → Custom domains → Set up a custom domain**：
-   - 新增 `brucemovie.com`（Cloudflare 會自動建立 Proxied CNAME 並簽發免費 HTTPS 憑證）。
-   - 新增 `www.brucemovie.com`（請先刪除原本指向 `webredir.vip.gandi.net` 的舊 CNAME 紀錄）。
-2. 在 Cloudflare 網域管理頁 → **Rules → Redirect Rules → Create rule**，設定 `www` 統一 301 導向主網域：
-   - **When incoming requests match**：`Hostname` `equals` `www.brucemovie.com`
-   - **Then URL redirect**：Dynamic → `concat("https://brucemovie.com", http.request.uri.path)`，Status code `301`，勾選 **Preserve query string**。
-3. 在 **SSL/TLS → Overview** 確認加密模式為 **Full (strict)**，並開啟 **SSL/TLS → Edge Certificates → Always Use HTTPS**。
+目前 Cloudflare DNS 已完整保留 Gandi 郵件（`MX`、`SRV`、`webmail` 僅 DNS）與 Google Search Console 驗證紀錄。若欲進一步強化網域防護，可隨時於 Cloudflare **網站 → `brucemovie.com`** 調整：
 
----
-
-## 步驟五：強化 DNS 郵件防偽造與憑證安全（SPF / DMARC / CAA）
-
-在 Cloudflare **DNS → Records** 中調整以下紀錄：
-
-1. **更新 SPF（取代原本寬鬆的 `?all`）**：
-   - Type: `TXT`｜Name: `@`
-   - Content: `v=spf1 include:_mailcust.gandi.net ~all`
-   - （確認寄信一段時間皆正常後，可進一步收緊為 `-all`）
-2. **強化 DMARC（取代原本的 `p=none`）**：
-   - Type: `TXT`｜Name: `_dmarc`
-   - 建議先設定觀察報告：`v=DMARC1; p=quarantine; rua=mailto:brucemovie@gmail.com; pct=100;`
-   - 確認 Gandi 郵件 DKIM/SPF 報告正常後，可收緊至 `p=reject`。
-3. **新增 CAA 紀錄（限制允許簽發 SSL 憑證的 CA 機構）**：
-   - Type: `CAA`｜Name: `@`｜Tag: `issue`｜Value: `letsencrypt.org`
-   - Type: `CAA`｜Name: `@`｜Tag: `issue`｜Value: `pki.goog`
-   - Type: `CAA`｜Name: `@`｜Tag: `issue`｜Value: `digicert.com`
+1. **`www` 統一 301 轉址至主網域**（選配）：
+   - 進入 **規則（Rules）→ 轉址規則（Redirect Rules）→ 建立規則**：
+   - 當 `Hostname` `equals` `www.brucemovie.com` → Dynamic Redirect `concat("https://brucemovie.com", http.request.uri.path)`（Status code `301`，勾選 Preserve query string）。
+2. **郵件防偽（SPF / DMARC）與憑證授權（CAA）**：
+   - **SPF（`TXT` `@`）**：`v=spf1 include:_mailcust.gandi.net ~all`
+   - **DMARC（`TXT` `_dmarc`）**：`v=DMARC1; p=quarantine; rua=mailto:brucemovie@gmail.com; pct=100;`
+   - **CAA（`CAA` `@`）**：新增 `issue` `letsencrypt.org`、`pki.goog`、`digicert.com`。
 
 ---
 
-## 上線後驗收清單
+## 五、正式站上線驗收狀態
 
-- [ ] `https://brucemovie.com/` 回傳 `HTTP/2 200`，並可透過 [SecurityHeaders.com](https://securityheaders.com/) 驗證獲得 **A / A+**。
-- [ ] `https://brucemovie.com/en` 直接開啟回傳 **`HTTP/2 200`**（不再是 404）。
-- [ ] `https://www.brucemovie.com/` 正常以 HTTPS 301 轉址至 `https://brucemovie.com/`。
-- [ ] 在 LINE / Facebook 分享檢錯工具中測試 `https://brucemovie.com/` 與 `https://brucemovie.com/en`，確認正常顯示 OG 預覽圖與摘要。
-- [ ] 實際送出一筆聯絡表單測試，確認 Turnstile 驗證通過且 `brucemovie@gmail.com` 成功收信。
-- [ ] 更新 [`src/data/site.ts`](./src/data/site.ts) 中的 `social.instagram` 為官方帳號網址後提交推送。
-- [ ] 至 Google Search Console 重新提交 `https://brucemovie.com/sitemap-index.xml`。
+- [x] `https://brucemovie.com/` 回傳 `HTTP/2 200`（`server: cloudflare`），HSTS、CSP、`X-Frame-Options: DENY`、`nosniff`、`Permissions-Policy` 等安全標頭全數生效。
+- [x] `https://brucemovie.com/en` 直接開啟回傳 **`HTTP/2 200`**（全站英文文案與 84 筆作品紀錄雙語化完成）。
+- [x] `https://www.brucemovie.com/` SSL 憑證已啟用並正常連線。
+- [x] 正式站「聯絡我們」表單實際寄信與 `brucemovie@gmail.com` 收信測試正常。
+- [ ] 待辦（選配）：將 [`src/data/site.ts`](./src/data/site.ts) 中的 `social.instagram` 替換為官方 Instagram 帳號網址。
+- [ ] 待辦（選配）：至 Google Search Console 提交 `https://brucemovie.com/sitemap-index.xml`。
