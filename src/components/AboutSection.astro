@@ -1,0 +1,93 @@
+---
+import { Image } from 'astro:assets';
+import { BRAND_IMAGES } from '../data/content';
+import { getTranslations, type Locale } from '../i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+---
+
+<section class="section" id="about" aria-labelledby="about-heading">
+  <div class="container">
+    <div class="about-header">
+      <h2 class="title" id="about-heading">{t.about.title}</h2>
+      <p class="description">{t.about.description}</p>
+    </div>
+
+    <div class="section-story-overview">
+      <div class="story-row">
+        <div class="story-col-left">
+          <div class="story-image-container story-image-container--left">
+            <div class="story-image-wrap">
+              <Image
+                src={BRAND_IMAGES.founderImg}
+                alt={t.media.founderAlt}
+                widths={[480, 586]}
+                sizes="(min-width: 768px) 52vw, 100vw"
+                format="webp"
+                quality={82}
+                loading="lazy"
+                decoding="async"
+                class="story-image"
+              />
+            </div>
+
+            <blockquote class="blockquote-primary">
+              <p>
+                {t.story.line1}<br />
+                {t.story.line2}<br />
+                {t.story.line3}
+              </p>
+              <footer>{t.story.founder}</footer>
+            </blockquote>
+          </div>
+
+          <div class="story-image-container story-bts">
+            <Image
+              src={BRAND_IMAGES.behindScenesImg}
+              alt={t.media.behindScenesAlt}
+              widths={[480, 602]}
+              sizes="(min-width: 768px) 48vw, 100vw"
+              format="webp"
+              quality={82}
+              loading="lazy"
+              decoding="async"
+              class="story-image"
+            />
+          </div>
+        </div>
+
+        <div class="story-col-right">
+          <div class="story-image-container story-image-container--right">
+            <Image
+              src={BRAND_IMAGES.awardMainImg}
+              alt={t.media.awardAlt}
+              widths={[480, 716]}
+              sizes="(min-width: 768px) 48vw, 100vw"
+              format="webp"
+              quality={84}
+              loading="lazy"
+              decoding="async"
+              class="story-image"
+            />
+          </div>
+
+          <div class="story-copy">
+            <h3>{t.intro.team}</h3>
+            <p>{t.intro.paragraph2}</p>
+
+            <h3>{t.intro.legitimate}</h3>
+            <p>{t.intro.paragraph3}</p>
+
+            <h3>{t.intro.founder}</h3>
+            <p>{t.intro.paragraph1}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

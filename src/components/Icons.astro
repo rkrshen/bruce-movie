@@ -1,0 +1,132 @@
+---
+interface Props {
+  name:
+    | 'facebook'
+    | 'instagram'
+    | 'menu'
+    | 'close'
+    | 'play'
+    | 'chevron-left'
+    | 'chevron-right'
+    | 'image'
+    | 'globe'
+    | 'action'
+    | 'user'
+    | 'mail';
+  size?: number;
+}
+
+const { name, size = 20 } = Astro.props;
+---
+
+{
+  name === 'facebook' && (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M19.5 3h-15A1.5 1.5 0 0 0 3 4.5v15A1.5 1.5 0 0 0 4.5 21h8.08v-6.97h-2.34v-2.72h2.34V9.31c0-2.32 1.42-3.59 3.49-3.59.99 0 1.85.07 2.1.11v2.43h-1.44c-1.13 0-1.35.54-1.35 1.32v1.73h2.7l-.35 2.72h-2.35V21h4.12a1.5 1.5 0 0 0 1.5-1.5v-15A1.5 1.5 0 0 0 19.5 3Z" />
+    </svg>
+  )
+}
+
+{
+  name === 'instagram' && (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="2.5" y="2.5" width="19" height="19" rx="5" />
+      <circle cx="12" cy="12" r="4.2" />
+      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
+{
+  name === 'menu' && (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <line x1="3" y1="18" x2="21" y2="18" />
+    </svg>
+  )
+}
+
+{
+  name === 'close' && (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <line x1="6" y1="6" x2="18" y2="18" />
+      <line x1="18" y1="6" x2="6" y2="18" />
+    </svg>
+  )
+}
+
+{
+  name === 'play' && (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <polygon points="7,4.5 20,12 7,19.5" />
+    </svg>
+  )
+}
+
+{
+  name === 'chevron-left' && (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="15 18 9 12 15 6" />
+    </svg>
+  )
+}
+
+{
+  name === 'chevron-right' && (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
+  )
+}
+
+{
+  name === 'image' && (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <circle cx="8.5" cy="9.5" r="1.5" />
+      <path d="m21 16-5-5-4 4-2-2-7 7" />
+    </svg>
+  )
+}
+
+{
+  name === 'globe' && (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="9.5" />
+      <line x1="2.5" y1="12" x2="21.5" y2="12" />
+      <path d="M12 2.5a14 14 0 0 1 3.8 9.5A14 14 0 0 1 12 21.5a14 14 0 0 1-3.8-9.5A14 14 0 0 1 12 2.5Z" />
+    </svg>
+  )
+}
+
+{
+  name === 'action' && (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="15" cy="5" r="2" />
+      <path d="M9 11.5 12 9l3 2.5 3.5-1.5" />
+      <path d="m11.5 13-2.5 6" />
+      <path d="m13 12 2.5 3.5-1.5 4.5" />
+      <path d="M6.5 14 9 11.5" />
+    </svg>
+  )
+}
+
+{
+  name === 'user' && (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="9.5" />
+      <circle cx="12" cy="9.2" r="3" />
+      <path d="M6.6 18.6a6.4 6.4 0 0 1 10.8 0" />
+    </svg>
+  )
+}
+
+{
+  name === 'mail' && (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="m3.5 6.5 8.5 6.5 8.5-6.5" />
+    </svg>
+  )
+}

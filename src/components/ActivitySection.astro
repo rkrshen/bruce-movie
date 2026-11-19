@@ -1,0 +1,54 @@
+---
+import { Image } from 'astro:assets';
+import { ACTIVITY_MEDIA, type ActivityKey } from '../data/content';
+import { getTranslations, type Locale } from '../i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const activityOrder: ActivityKey[] = ['stage', 'tccf', 'masterclass', 'campus'];
+---
+
+<section class="section text-center" id="activity" aria-labelledby="activity-heading">
+  <div class="container">
+    <h2 class="title" id="activity-heading">{t.activity.title}</h2>
+
+    <div class="activity-grid">
+      {
+        activityOrder.map((key) => {
+          const card = t.activity.cards[key];
+          const images = ACTIVITY_MEDIA[key];
+
+          return (
+            <article class="activity-card">
+              <div class="activity-card__images">
+                {images.map((img, idx) => (
+                  <Image
+                    src={img}
+                    alt={card.alts[idx] ?? card.title}
+                    widths={[480, 760]}
+                    sizes="(min-width: 576px) 48vw, 100vw"
+                    format="webp"
+                    quality={80}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ))}
+              </div>
+              <div class="activity-card__body">
+                <h3 class="activity-card__title">{card.title}</h3>
+                {card.lines.map((line) => (
+                  <p class="activity-card__text">{line}</p>
+                ))}
+                {card.note && <p class="activity-card__text activity-note">{card.note}</p>}
+              </div>
+            </article>
+          );
+        })
+      }
+    </div>
+  </div>
+</section>

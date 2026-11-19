@@ -1,0 +1,83 @@
+---
+import { EFFECT_TABS, EFFECT_VIDEOS, type EffectTabKey } from '../data/content';
+import { getTranslations, type Locale } from '../i18n';
+import Icons from './Icons.astro';
+import LazyVideoCard from './LazyVideoCard.astro';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+
+const tabIconMap: Record<EffectTabKey, 'image' | 'globe' | 'action'> = {
+  series: 'image',
+  films: 'globe',
+  commercials: 'action',
+};
+---
+
+<section class="section" id="award" aria-labelledby="effects-heading">
+  <div class="container">
+    <h2 class="title text-center" id="effects-heading">{t.effect.title}</h2>
+
+    <div data-tabs-root>
+      <div class="effects-tablist" role="tablist" aria-label={t.effect.tabAriaLabel}>
+        {
+          EFFECT_TABS.map((tab, index) => {
+            const selected = index === 0;
+            const label = t.effect.tabs[tab.id];
+            return (
+              <button
+                type="button"
+                role="tab"
+                class="effect-pill-btn"
+                id={`effect-tab-${tab.id}`}
+                title={label}
+                aria-label={label}
+                aria-selected={selected ? 'true' : 'false'}
+                aria-controls={`effect-panel-${tab.id}`}
+                tabindex={selected ? 0 : -1}
+              >
+                <Icons name={tabIconMap[tab.id]} size={24} />
+                <span class="visually-hidden">{label}</span>
+              </button>
+            );
+          })
+        }
+      </div>
+
+      <div class="effects-grid-wrap">
+        {
+          EFFECT_TABS.map((tab, index) => (
+            <div
+              role="tabpanel"
+              id={`effect-panel-${tab.id}`}
+              aria-labelledby={`effect-tab-${tab.id}`}
+              hidden={index !== 0}
+            >
+              <div class="effects-grid">
+                {tab.items.map((itemKey) => {
+                  const video = EFFECT_VIDEOS[itemKey];
+                  const copy = t.effect.items[itemKey];
+                  return (
+                    <LazyVideoCard
+                      title={copy.title}
+                      description={copy.description}
+                      poster={video.poster}
+                      src={video.src}
+                      playLabel={t.effect.playButton}
+                      playAriaLabel={`${t.effect.playAriaPrefix}${copy.title}`}
+                      unsupportedText={t.effect.videoUnsupported}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>

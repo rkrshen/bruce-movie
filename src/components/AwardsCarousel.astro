@@ -1,0 +1,104 @@
+---
+import { Image } from 'astro:assets';
+import { AWARD_SLIDES } from '../data/content';
+import { getTranslations, type Locale } from '../i18n';
+import Icons from './Icons.astro';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const total = AWARD_SLIDES.length;
+---
+
+<section class="section text-center" id="work" aria-labelledby="work-heading">
+  <div class="container">
+    <h2 class="title" id="work-heading">{t.work.title}</h2>
+
+    <div
+      class="work-carousel"
+      role="region"
+      aria-roledescription="carousel"
+      aria-label={t.work.carouselAriaLabel}
+      data-carousel
+    >
+      <div class="work-carousel__stage" data-carousel-stage>
+        <button
+          type="button"
+          class="work-carousel__arrow work-carousel__arrow--prev"
+          data-carousel-prev
+          aria-label={t.work.prevSlide}
+        >
+          <Icons name="chevron-left" size={20} />
+        </button>
+
+        {
+          AWARD_SLIDES.map((slide, idx) => {
+            const stateClass =
+              idx === 0
+                ? 'is-active'
+                : idx === 1
+                  ? 'is-next'
+                  : idx === total - 1
+                    ? 'is-prev'
+                    : '';
+            return (
+              <figure
+                class:list={['work-carousel__slide', stateClass]}
+                role="group"
+                aria-roledescription="slide"
+                aria-label={t.work.slideOf(idx + 1, total)}
+                data-slide-index={String(idx)}
+                data-slide-label={t.work.slideOf(idx + 1, total)}
+              >
+                <div class="work-carousel__mask" aria-hidden="true" />
+                <Image
+                  src={slide.image}
+                  alt={slide.alt[locale]}
+                  widths={[480, 760, 1080]}
+                  sizes="(min-width: 768px) 420px, 92vw"
+                  format="webp"
+                  quality={82}
+                  loading="lazy"
+                  decoding="async"
+                  fetchpriority={idx === 0 ? undefined : 'low'}
+                  class="work-carousel__img"
+                />
+                <figcaption class="work-carousel__caption">
+                  {slide.caption[locale]}
+                </figcaption>
+              </figure>
+            );
+          })
+        }
+
+        <button
+          type="button"
+          class="work-carousel__arrow work-carousel__arrow--next"
+          data-carousel-next
+          aria-label={t.work.nextSlide}
+        >
+          <Icons name="chevron-right" size={20} />
+        </button>
+      </div>
+
+      <p class="visually-hidden" role="status" aria-live="polite" data-carousel-status></p>
+
+      <nav class="work-carousel__markers" aria-label={t.work.markersAriaLabel}>
+        {
+          AWARD_SLIDES.map((_, idx) => (
+            <button
+              type="button"
+              class="work-carousel__marker"
+              data-carousel-marker={String(idx)}
+              aria-label={t.work.goToSlide(idx + 1)}
+              aria-current={idx === 0 ? 'true' : undefined}
+            />
+          ))
+        }
+      </nav>
+    </div>
+  </div>
+</section>

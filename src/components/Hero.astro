@@ -1,0 +1,36 @@
+---
+import { Image } from 'astro:assets';
+import { BRAND_IMAGES } from '../data/content';
+import { getTranslations, type Locale } from '../i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+---
+
+<section class="page-header" aria-labelledby="hero-heading">
+  <div class="page-header-image" data-parallax>
+    <Image
+      src={BRAND_IMAGES.heroCover}
+      alt={t.media.heroAlt}
+      widths={[640, 960, 1334]}
+      sizes="100vw"
+      format="webp"
+      quality={82}
+      fetchpriority="high"
+      loading="eager"
+      decoding="sync"
+      class="page-header-media"
+    />
+  </div>
+
+  <div class="content-center">
+    <div class="container">
+      <h1 class="title" id="hero-heading">{t.mainTitle.title}</h1>
+      <p class="hero-subtitle">{t.mainTitle.subTitle}</p>
+    </div>
+  </div>
+</section>

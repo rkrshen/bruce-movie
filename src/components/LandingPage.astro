@@ -1,0 +1,35 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navbar from './Navbar.astro';
+import Hero from './Hero.astro';
+import AboutSection from './AboutSection.astro';
+import MediaReportSection from './MediaReportSection.astro';
+import ActivitySection from './ActivitySection.astro';
+import EffectsSection from './EffectsSection.astro';
+import AwardsCarousel from './AwardsCarousel.astro';
+import RecordsSection from './RecordsSection.astro';
+import ContactSection from './ContactSection.astro';
+import Footer from './Footer.astro';
+import type { Locale } from '../i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+---
+
+<BaseLayout locale={locale} preloadHero>
+  <Navbar locale={locale} />
+  <main id="main-content" tabindex="-1">
+    <Hero locale={locale} />
+    <AboutSection locale={locale} />
+    <MediaReportSection locale={locale} />
+    <ActivitySection locale={locale} />
+    <EffectsSection locale={locale} />
+    <AwardsCarousel locale={locale} />
+    <RecordsSection locale={locale} />
+    <ContactSection locale={locale} />
+  </main>
+  <Footer locale={locale} />
+</BaseLayout>

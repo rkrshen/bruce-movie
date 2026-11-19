@@ -1,0 +1,108 @@
+---
+import { Image } from 'astro:assets';
+import { SITE } from '../data/site';
+import { BRAND_IMAGES } from '../data/content';
+import { getTranslations, type Locale } from '../i18n';
+import Icons from './Icons.astro';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const homeHref = locale === 'en' ? '/en' : '/';
+const switchHref = locale === 'en' ? '/' : '/en';
+
+const navItems = [
+  { href: `${homeHref}#about`, label: t.header.intro },
+  { href: `${homeHref}#report`, label: t.header.report },
+  { href: `${homeHref}#activity`, label: t.header.activity },
+  { href: `${homeHref}#award`, label: t.header.effect },
+  { href: `${homeHref}#work`, label: t.header.work },
+  { href: `${homeHref}#contact`, label: t.header.contact },
+];
+---
+
+<header>
+  <nav
+    class="navbar navbar-transparent"
+    id="site-header"
+    aria-label={t.header.navAriaLabel}
+  >
+    <div class="container navbar-inner">
+      <a class="navbar-brand" href={homeHref} aria-label={t.header.brandAlt}>
+        <Image
+          src={BRAND_IMAGES.logoImg}
+          alt={t.header.brandAlt}
+          width={200}
+          height={111}
+          format="webp"
+          quality={88}
+          loading="eager"
+        />
+      </a>
+
+      <button
+        type="button"
+        class="navbar-toggler"
+        id="nav-toggle"
+        aria-expanded="false"
+        aria-controls="nav-menu"
+        aria-label={t.header.menuToggleLabel}
+      >
+        <Icons name="menu" size={24} />
+      </button>
+
+      <div class="navbar-collapse" id="nav-menu">
+        <ul class="navbar-nav">
+          {
+            navItems.map((item) => (
+              <li class="nav-item">
+                <a class="nav-link" href={item.href}>
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+          <li class="nav-item">
+            <a
+              class="nav-link nav-link--icon"
+              href={SITE.social.facebook}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Like us on Facebook"
+              aria-label={t.header.facebookLabel}
+            >
+              <Icons name="facebook" size={18} />
+              <span class="nav-icon-text">Facebook</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link nav-link--icon"
+              href={SITE.social.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Follow us on Instagram"
+              aria-label={t.header.instagramLabel}
+            >
+              <Icons name="instagram" size={18} />
+              <span class="nav-icon-text">Instagram</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              href={switchHref}
+              hreflang={locale === 'en' ? 'zh-TW' : 'en'}
+              aria-label={t.header.switchLanguageAria}
+            >
+              {t.header.switchLanguage}
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>

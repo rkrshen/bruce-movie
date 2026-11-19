@@ -1,0 +1,63 @@
+---
+import { SITE } from '../data/site';
+import { BRAND_IMAGES } from '../data/content';
+import { getTranslations, type Locale } from '../i18n';
+import Icons from './Icons.astro';
+import LazyVideoCard from './LazyVideoCard.astro';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const ytThumbnail = `https://i.ytimg.com/vi/${SITE.youtubeReportId}/hqdefault.jpg`;
+const ytEmbedUrl = `https://www.youtube-nocookie.com/embed/${SITE.youtubeReportId}?autoplay=1&rel=0`;
+---
+
+<section class="section text-center" id="report" aria-labelledby="report-heading">
+  <div class="container">
+    <h2 class="title" id="report-heading">{t.report.title}</h2>
+
+    <div class="report-wrap">
+      <div
+        class="video-stage"
+        data-youtube-facade
+        data-embed-url={ytEmbedUrl}
+        data-iframe-title={t.report.youtubeTitle}
+      >
+        <button
+          type="button"
+          class="lazy-video-card__preview"
+          aria-label={t.report.youtubePlayLabel}
+        >
+          <img
+            src={ytThumbnail}
+            alt={t.report.youtubeTitle}
+            width="480"
+            height="360"
+            loading="lazy"
+            decoding="async"
+            class="lazy-video-card__poster"
+          />
+          <span class="lazy-video-card__overlay" aria-hidden="true">
+            <span class="lazy-video-card__play">
+              <Icons name="play" size={14} />
+              <span>{t.effect.playButton}</span>
+            </span>
+          </span>
+        </button>
+      </div>
+
+      <LazyVideoCard
+        title={t.report.simulationTitle}
+        poster={BRAND_IMAGES.posterReportSimulation}
+        src="/video/report-simulation.mp4"
+        playLabel={t.effect.playButton}
+        playAriaLabel={`${t.effect.playAriaPrefix}${t.report.simulationTitle}`}
+        unsupportedText={t.effect.videoUnsupported}
+        centered
+      />
+    </div>
+  </div>
+</section>

@@ -1,0 +1,65 @@
+---
+import { PROJECT_RECORDS } from '../data/content';
+import { getTranslations, type Locale } from '../i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+---
+
+<section class="section section-records" aria-label={t.records.kicker}>
+  <div class="container">
+    <div class="record-browser" data-tabs-root>
+      <div
+        class="record-tab-nav"
+        role="tablist"
+        aria-label={t.records.tabAriaLabel}
+      >
+        {
+          PROJECT_RECORDS.map((group, index) => {
+            const selected = index === 0;
+            return (
+              <button
+                type="button"
+                role="tab"
+                class="record-tab-button"
+                id={`record-tab-${group.id}`}
+                aria-selected={selected ? 'true' : 'false'}
+                aria-controls={`record-panel-${group.id}`}
+                tabindex={selected ? 0 : -1}
+              >
+                {group.label[locale]}
+              </button>
+            );
+          })
+        }
+      </div>
+
+      {
+        PROJECT_RECORDS.map((group, index) => (
+          <div
+            class="record-panel"
+            role="tabpanel"
+            id={`record-panel-${group.id}`}
+            aria-labelledby={`record-tab-${group.id}`}
+            hidden={index !== 0}
+          >
+            <div class="record-panel-header">
+              <p class="record-panel-kicker">{t.records.kicker}</p>
+              <h3 class="record-panel-title">{group.heading[locale]}</h3>
+              <p class="record-panel-meta">{t.records.count(group.items.length)}</p>
+            </div>
+            <ul class="record-list" role="list">
+              {group.items.map((item) => (
+                <li class="record-list-item">{item}</li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
