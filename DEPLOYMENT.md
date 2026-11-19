@@ -11,7 +11,7 @@
 | **正式主網域** | `https://brucemovie.com`（中：`/`、英：`/en`） |
 | **次要網域** | `https://www.brucemovie.com`（已綁定 SSL 憑證） |
 | **Cloudflare Pages 專案名稱** | `bruce-movie`（預覽網址：`https://bruce-movie.pages.dev`） |
-| **GitHub 連動倉庫** | `rkrshen/rkrshen.github.io` |
+| **GitHub 連動倉庫** | `rkrshen/bruce-movie` |
 | **正式環境分支（Production branch）** | `master` |
 | **日常開發分支（Development branch）** | `develop` |
 | **Node.js 執行環境版本** | Node `24`（由根目錄 [`.node-version`](./.node-version) 自動指定） |
