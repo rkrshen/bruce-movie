@@ -1,6 +1,6 @@
 ---
 import { Image } from 'astro:assets';
-import { BRAND_IMAGES } from '../data/content';
+import { BRAND_IMAGES, HERO_IMAGE_CONFIG } from '../data/content';
 import { getTranslations, type Locale } from '../i18n';
 import Icons from './Icons.astro';
 
@@ -17,10 +17,10 @@ const t = getTranslations(locale);
     <Image
       src={BRAND_IMAGES.heroCover}
       alt={t.media.heroAlt}
-      widths={[640, 960, 1334]}
-      sizes="100vw"
-      format="webp"
-      quality={84}
+      widths={HERO_IMAGE_CONFIG.widths}
+      sizes={HERO_IMAGE_CONFIG.sizes}
+      format={HERO_IMAGE_CONFIG.format}
+      quality={HERO_IMAGE_CONFIG.quality}
       fetchpriority="high"
       loading="eager"
       decoding="sync"

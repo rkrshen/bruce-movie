@@ -1,5 +1,9 @@
 export const SITE = {
   url: 'https://brucemovie.com',
+  legalName: 'Bruce Movie Special Effects CO., LTD.',
+  logo: '/logo.png',
+  logoWidth: 714,
+  logoHeight: 396,
   ogImage: '/og-image.jpg',
   ogImageWidth: 1200,
   ogImageHeight: 630,

@@ -30,7 +30,24 @@ export default defineConfig({
           en: 'en',
         },
       },
+      namespaces: {
+        xhtml: true,
+        news: false,
+        image: false,
+        video: false,
+      },
+      lastmod: new Date(),
       filter: (page) => !page.endsWith('/404'),
+      serialize(item) {
+        const links = item.links ? [...item.links] : [];
+        if (!links.some((link) => link.lang === 'x-default')) {
+          links.push({ lang: 'x-default', url: 'https://brucemovie.com/' });
+        }
+        return {
+          ...item,
+          links,
+        };
+      },
     }),
   ],
 });

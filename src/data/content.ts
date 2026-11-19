@@ -38,6 +38,13 @@ export const BRAND_IMAGES = {
   posterReportSimulation,
 } as const;
 
+export const HERO_IMAGE_CONFIG = {
+  widths: [640, 960, 1334] as number[],
+  sizes: '100vw',
+  format: 'webp',
+  quality: 84,
+} as const;
+
 export type ActivityKey = 'stage' | 'tccf' | 'masterclass' | 'campus';
 
 export const ACTIVITY_MEDIA: Record<ActivityKey, ImageMetadata[]> = {
@@ -115,12 +122,12 @@ export const AWARD_SLIDES: AwardSlide[] = [
   {
     image: awardGoldenHorseImg,
     caption: {
-      'zh-TW': '榮獲 第58屆 金馬獎－年度傑出電影工作者獎《現場特效指導》',
-      en: 'Winner — 58th Golden Horse Awards: Outstanding Taiwanese Filmmaker of the Year (Practical Special Effects)',
+      'zh-TW': '榮獲 第59屆 金馬獎－年度台灣傑出電影工作者《現場特效指導》',
+      en: 'Winner — 59th Golden Horse Awards: Outstanding Taiwanese Filmmaker of the Year (Practical Special Effects)',
     },
     alt: {
-      'zh-TW': '第58屆金馬獎 年度傑出電影工作者獎現場特效指導紀錄',
-      en: '58th Golden Horse Awards Outstanding Taiwanese Filmmaker of the Year recognition',
+      'zh-TW': '第59屆金馬獎 年度台灣傑出電影工作者現場特效指導紀錄',
+      en: '59th Golden Horse Awards Outstanding Taiwanese Filmmaker of the Year recognition',
     },
   },
   {

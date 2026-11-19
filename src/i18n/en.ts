@@ -6,14 +6,27 @@ export const en: Translations = {
   ogAlternateLocale: 'zh_TW',
   skipToContent: 'Skip to main content',
   seo: {
-    title: 'Bruce Movie VFX | Taiwan Practical Special Effects Team for Explosions, Fire & Smoke',
+    title: 'Bruce Movie VFX | Taiwan Practical Effects & Pyrotechnics',
     description:
-      'Bruce Movie VFX specializes in on-set practical explosions, fire, and smoke effects, strictly following safety protocols to minimize risk. We are currently the only special effects company in Taiwan with certified approval cases through authorities including the Ministry of Culture and the Ministry of Economic Affairs—building a safer, more professional environment for practical pyrotechnics in Taiwanese cinema.',
+      'Taiwan practical SFX team specializing in on-set explosions, fire, and smoke—the only company in Taiwan with government-certified film pyrotechnics approvals.',
     ogDescription:
-      'Specializing in on-set practical explosions, fire, and smoke effects, Bruce Movie VFX is Taiwan’s professional film pyrotechnics team with government-certified approval cases.',
+      'Taiwan practical special effects team specializing in on-set explosions, fire, and smoke, with government-certified film pyrotechnics approvals.',
     organizationName: 'Bruce Movie VFX',
     organizationAltName: '澤影映像電影特效',
     founderName: 'Ming-Ze Chen',
+    founderAltName: '陳銘澤',
+    founderJobTitle: 'Founder & Practical Pyrotechnics Supervisor',
+    areaServed: 'Taiwan',
+    knowsAbout: [
+      'On-Set Practical Explosions & Pyrotechnics',
+      'Practical Fire & Smoke Effects',
+      'Licensed Pyrotechnic Imports & Permit Guidance',
+      'Live Theater Practical Special Effects',
+    ],
+    awards: [
+      '59th Golden Horse Awards — Outstanding Taiwanese Filmmaker of the Year (Practical Special Effects)',
+      '2nd Outstanding Audiovisual Workers Award — Film Worker of the Year (Practical Special Effects)',
+    ],
     ogImageAlt: 'Bruce Movie VFX — Practical Special Effects in Taiwan',
   },
   header: {

@@ -97,11 +97,28 @@
 
 ---
 
-## 五、正式站上線驗收狀態
+## 五、流量監測與 SEO 檢視（Google Search Console + Cloudflare Web Analytics）
+
+[`public/_headers`](./public/_headers) 的 CSP 已預先放行 `https://static.cloudflareinsights.com`（`script-src`）與 `https://cloudflareinsights.com`（`connect-src`），部署至正式站後依下列步驟即可零額外追蹤碼完成監測設定：
+
+1. **開啟 Cloudflare Web Analytics（免 Cookie 真實訪客流量與 Core Web Vitals）**：
+   - 登入 [Cloudflare Dashboard](https://dash.cloudflare.com/) → **Workers & Pages → `bruce-movie` → 指標（Metrics）→ Web Analytics → 啟用（Enable）**。
+   - 啟用後 Cloudflare 會在邊緣節點自動注入輕量統計腳本，數小時後即可於 **Analytics & Logs → Web Analytics** 查看 Visits、Pageviews、來源 Referrer、裝置與 LCP / INP / CLS 實測數據。
+   - 若偏好免前端腳本的邊緣層總流量，亦可直接於網域 `brucemovie.com` → **Analytics & Logs → Traffic** 檢視。
+2. **提交 Sitemap 至 Google Search Console（搜尋曝光與關鍵字排名）**：
+   - 進入 [Google Search Console](https://search.google.com/search-console) 選擇 `brucemovie.com` 資源（DNS 已保留既有驗證紀錄）。
+   - 於左側 **Sitemap** 輸入 `https://brucemovie.com/sitemap-index.xml` 並提交。
+   - 可順手使用 **網址審查（URL Inspection）** 檢查 `https://brucemovie.com/` 與 `https://brucemovie.com/en` 並要求建立索引。
+   - （選配）至 [Bing Webmaster Tools](https://www.bing.com/webmasters) 一鍵從 GSC 匯入網域並提交同一個 Sitemap，同步涵蓋 Bing 與部分 AI 搜尋來源。
+
+---
+
+## 六、正式站上線驗收狀態
 
 - [x] `https://brucemovie.com/` 回傳 `HTTP/2 200`（`server: cloudflare`），HSTS、CSP、`X-Frame-Options: DENY`、`nosniff`、`Permissions-Policy` 等安全標頭全數生效。
 - [x] `https://brucemovie.com/en` 直接開啟回傳 **`HTTP/2 200`**（全站英文文案與 84 筆作品紀錄雙語化完成）。
 - [x] `https://www.brucemovie.com/` SSL 憑證已啟用並正常連線。
 - [x] 正式站「聯絡我們」表單實際寄信與 `brucemovie@gmail.com` 收信測試正常。
 - [ ] 待辦（選配）：將 [`src/data/site.ts`](./src/data/site.ts) 中的 `social.instagram` 替換為官方 Instagram 帳號網址。
-- [ ] 待辦（選配）：至 Google Search Console 提交 `https://brucemovie.com/sitemap-index.xml`。
+- [ ] 待辦：於 Cloudflare Pages 啟用 **Web Analytics**。
+- [ ] 待辦：至 Google Search Console 提交 `https://brucemovie.com/sitemap-index.xml`。

@@ -4,6 +4,26 @@
 
 ---
 
+## [2.1.1] — 2026-11-19
+
+### SEO 進階優化、流量監測整備與金馬獎文案校訂
+- **修正 Hero LCP 預載不一致**（[`src/data/content.ts`](./src/data/content.ts)、[`src/layouts/BaseLayout.astro`](./src/layouts/BaseLayout.astro)、[`src/components/Hero.astro`](./src/components/Hero.astro)）：
+  - 抽離共用常數 `HERO_IMAGE_CONFIG` 統一首圖 `widths`、`sizes`、`format` 與 `quality`，消除 `<link rel="preload">` 與 `<img>` 產出不同 WebP hash 導致重複下載的問題。
+- **升級結構化資料（JSON-LD `@graph`）與合規品牌 Logo**（[`src/layouts/BaseLayout.astro`](./src/layouts/BaseLayout.astro)、[`src/data/site.ts`](./src/data/site.ts)、[`public/logo.png`](./public/logo.png)）：
+  - 產出 EXIF 剝除、實心黑底的獨立靜態品牌 Logo [`public/logo.png`](./public/logo.png)（`714×396`，符合 Google 結構化資料 `>= 112×112` 與白底可視性建議）並於 [`public/_headers`](./public/_headers) 加入快取設定。
+  - 以 `@id` 串聯 `WebSite`（Site Name 規範）、`Organization`（`legalName`、`ImageObject` logo、`areaServed`、`knowsAbout`、`award`）、`Person`（創辦人中英文名、職稱、獎項）與 `WebPage` 四大 Schema 實體。
+- **Meta 精簡、Robots 預覽指令與 404 頁面清理**（[`src/i18n/zh-TW.ts`](./src/i18n/zh-TW.ts)、[`src/i18n/en.ts`](./src/i18n/en.ts)、[`src/layouts/BaseLayout.astro`](./src/layouts/BaseLayout.astro)）：
+  - 將英文版 `title`（57 字元）、`description`（158 字元）與中文版 `description`（65 字元）調整至搜尋結果最佳顯示長度。
+  - 可索引頁面補齊 `max-image-preview:large, max-snippet:-1, max-video-preview:-1`；`404.html`（`noindex`）不再輸出首頁 `og:url`、首頁 `og:description` 與首頁 JSON-LD。
+- **多語系 Sitemap 強化**（[`astro.config.mjs`](./astro.config.mjs)）：
+  - 移除未使用的 XML namespace、加入 `lastmod`，並在 `sitemap-0.xml` 補齊 `x-default` 語系對應連結。
+- **流量監測整備（Google Search Console + Cloudflare Web Analytics）**（[`public/_headers`](./public/_headers)、[`DEPLOYMENT.md`](./DEPLOYMENT.md)）：
+  - 於嚴格 CSP 中放行 `https://static.cloudflareinsights.com`（`script-src`）與 `https://cloudflareinsights.com`（`connect-src`），支援 Cloudflare Pages 一鍵開啟免 Cookie 的 Web Analytics，並於 [`DEPLOYMENT.md`](./DEPLOYMENT.md) 記錄完整啟用與 GSC 提交步驟。
+- **金馬獎屆次文案更正**（[`src/data/content.ts`](./src/data/content.ts)、[`src/i18n/zh-TW.ts`](./src/i18n/zh-TW.ts)、[`src/i18n/en.ts`](./src/i18n/en.ts)）：
+  - 將得獎輪播中英文標題、`alt` 與 JSON-LD 獎項由「第58屆」更正為「第59屆金馬獎－年度台灣傑出電影工作者（59th Golden Horse Awards）」，與站內金馬官方海報一致。
+
+---
+
 ## [2.1.0] — 2026-11-19
 
 ### 1. 2027 電影深色質感 UI/UX 全面重構（內容 100% 保留）
